@@ -1,3 +1,6 @@
 [submodule "PreflightCheckLibs"]
 	path = PreflightCheckLibs
 	url = https://github.com/1090MHz/PreflightCheckLibs.git
+[submodule "XPlaneUtilities"]
+	path = XPlaneUtilities
+	url = https://github.com/1090MHz/XPlaneUtilities.git
