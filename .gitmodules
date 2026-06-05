@@ -4,3 +4,6 @@
 [submodule "XPlaneUtilities"]
 	path = XPlaneUtilities
 	url = https://github.com/1090MHz/XPlaneUtilities.git
+[submodule "fmt"]
+	path = fmt
+	url = https://github.com/fmtlib/fmt.git
