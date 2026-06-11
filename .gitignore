@@ -452,3 +452,6 @@ CMakeUserPresets.json
 
 # Ignore third_party folder
 third_party/*
+
+# Ignore VS Code Settings
+.vscode/settings.json
