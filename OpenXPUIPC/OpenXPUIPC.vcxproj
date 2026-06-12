@@ -92,12 +92,15 @@
       <PreprocessorDefinitions>IBM;XPLM430;XPLM420;XPLM411;XPLM400;XPLM303;XPLM302;XPLM301;XPLM300;XPLM210;XPLM200;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\third_party\libs\XPSDK430\Libraries\Win</AdditionalLibraryDirectories>
+      <AdditionalDependencies>XPLM_64.lib;XPWidgets_64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -109,12 +112,15 @@
       <PreprocessorDefinitions>IBM;XPLM430;XPLM420;XPLM411;XPLM400;XPLM303;XPLM302;XPLM301;XPLM300;XPLM210;XPLM200;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\third_party\libs\XPSDK430\Libraries\Win</AdditionalLibraryDirectories>
+      <AdditionalDependencies>XPLM_64.lib;XPWidgets_64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -124,12 +130,15 @@
       <PreprocessorDefinitions>IBM;XPLM430;XPLM420;XPLM411;XPLM400;XPLM303;XPLM302;XPLM301;XPLM300;XPLM210;XPLM200;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\third_party\libs\XPSDK430\Libraries\Win</AdditionalLibraryDirectories>
+      <AdditionalDependencies>XPLM_64.lib;XPWidgets_64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -141,12 +150,15 @@
       <PreprocessorDefinitions>IBM;XPLM430;XPLM420;XPLM411;XPLM400;XPLM303;XPLM302;XPLM301;XPLM300;XPLM210;XPLM200;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\third_party\libs\XPSDK430\Libraries\Win</AdditionalLibraryDirectories>
+      <AdditionalDependencies>XPLM_64.lib;XPWidgets_64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
