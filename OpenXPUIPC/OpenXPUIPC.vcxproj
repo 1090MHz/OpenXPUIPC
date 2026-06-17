@@ -162,6 +162,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\plugin.cpp" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XPlaneUtilities\XPlaneUtilities.vcxproj">
       <Project>{1c088283-aff5-4a73-840f-7fb99ff0cc3d}</Project>
