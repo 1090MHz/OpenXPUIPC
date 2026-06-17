@@ -92,7 +92,7 @@
       <PreprocessorDefinitions>IBM;XPLM430;XPLM420;XPLM411;XPLM400;XPLM303;XPLM302;XPLM301;XPLM300;XPLM210;XPLM200;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -112,7 +112,7 @@
       <PreprocessorDefinitions>IBM;XPLM430;XPLM420;XPLM411;XPLM400;XPLM303;XPLM302;XPLM301;XPLM300;XPLM210;XPLM200;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>IBM;XPLM430;XPLM420;XPLM411;XPLM400;XPLM303;XPLM302;XPLM301;XPLM300;XPLM210;XPLM200;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -150,7 +150,7 @@
       <PreprocessorDefinitions>IBM;XPLM430;XPLM420;XPLM411;XPLM400;XPLM303;XPLM302;XPLM301;XPLM300;XPLM210;XPLM200;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include;</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
