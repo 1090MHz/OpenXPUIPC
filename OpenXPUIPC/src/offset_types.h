@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Core types and utilities shared by all FSUIPC offset tables.
 //
 // This header is included by every fsuipc_offsets/ category file.

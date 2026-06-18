@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0-or-later
 // fsuipc_offsets/Simulation.h — Production offset table
 //
 // 197 total offsets in this category

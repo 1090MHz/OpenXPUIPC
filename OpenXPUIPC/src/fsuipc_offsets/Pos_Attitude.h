@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0-or-later
 // fsuipc_offsets/Pos./Attitude.h — Production offset table
 //
 // 65 total offsets in this category

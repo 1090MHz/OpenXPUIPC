@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0-or-later
 // UDP server: receives FSUIPC-style action packets, queues them for processing
 // on the X-Plane main thread via a flight loop callback.
 #pragma once

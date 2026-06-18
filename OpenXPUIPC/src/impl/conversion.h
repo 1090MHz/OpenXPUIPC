@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Unit conversions and encoding helpers for FSUIPC ↔ X-Plane bridging
 #pragma once
 #include <cmath>

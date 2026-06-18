@@ -1,5 +1,5 @@
 // OpenXPUIPC v1.0.0 — FSUIPC-compatible IPC bridge for X-Plane 12
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Provides two interfaces to external applications:
 //   1. FSUIPC IPC (shared memory via UIPCMAIN window) — for FSUIPC-compatible clients
