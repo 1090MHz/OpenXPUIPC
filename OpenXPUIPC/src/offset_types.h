@@ -16,6 +16,9 @@
 #include <cstring>
 #include <vector>
 
+// Bring conv::from_bcd into scope for compatibility with existing code
+using conv::from_bcd;
+
 // Write a typed value into a byte buffer
 template<typename T>
 inline void put(uint8_t* dst, T val) { std::memcpy(dst, &val, sizeof(T)); }
