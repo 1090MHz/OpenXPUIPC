@@ -8,6 +8,7 @@
 #pragma once
 
 #include "dataref_cache.h"
+#include "impl/conversion.h"  // conv:: namespace (widely used across categories)
 #include <XPLMDataAccess.h>
 #include <cstdint>
 #include <cstring>
