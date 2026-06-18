@@ -18,6 +18,11 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
 {
   static const std::vector<OffsetEntry> table = {
 
+
+      // ===== Cockpit ================================================
+
+      // Nav Lights — Operates NAV, Taxi, Panel and Wing light (but only
+      // reflects NAV settings). See $0D0C for more control
       {0x0280, 1,
        // Read/Write: Read/Write
        [](uint8_t *dst, DataRefCache &dref)

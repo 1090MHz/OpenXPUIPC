@@ -18,6 +18,11 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_controls()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Controls ===============================================
+//
+//       // Auto-rudder — 1=on, 0=off. Also known as auto-coordination. Changing
+//       // this works but doesn't affect Menu setting.
 //       {0x0278, 2,
 //        // Read/Write: Read/Write
 //        [](uint8_t *dst, DataRefCache &dref)

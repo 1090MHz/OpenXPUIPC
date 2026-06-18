@@ -19,6 +19,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
 {
   static const std::vector<OffsetEntry> table = {
 
+
+      // ===== Radios =================================================
+
+      // ADF2 freq (FS2004) — Main 3 digits in BCD
       {0x02D4, 2,
        // Read/Write: Read/Write
        [](uint8_t *dst, DataRefCache &dref)

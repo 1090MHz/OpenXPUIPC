@@ -18,6 +18,11 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Weather ================================================
+//
+//       // METAR station altitude (FSMeteo) — metres, set as SURFACE
+//       // TEMPERATURE ALTITUDE for Adventures
 //       {0x04B4, 2,
 //        // Read/Write: Read (only)
 //        [](uint8_t *dst, DataRefCache &dref)

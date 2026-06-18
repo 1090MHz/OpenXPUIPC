@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_electrical()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Electrical =============================================
+//
+//       // Master Battery Switch
 //       {0x281C, 4,
 //        // Read/Write: Unknown
 //        nullptr,

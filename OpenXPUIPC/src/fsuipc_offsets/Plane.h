@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Plane ==================================================
+//
+//       // Design speed VS0 — Stall speed full flaps, in ft/sec
 //       {0x0538, 8,
 //        // Read/Write: Read (only)
 //        [](uint8_t *dst, DataRefCache &dref)

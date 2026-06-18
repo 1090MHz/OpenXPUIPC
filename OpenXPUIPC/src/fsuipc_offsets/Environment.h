@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
 {
   static const std::vector<OffsetEntry> table = {
 
+
+      // ===== Environment ============================================
+
+      // Clock Hour — 0-23
       {0x0238, 1,
        // Read/Write: Read/Write
        [](uint8_t *dst, DataRefCache &dref)
