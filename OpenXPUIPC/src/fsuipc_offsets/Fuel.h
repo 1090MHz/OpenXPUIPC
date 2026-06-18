@@ -42,7 +42,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
          float ratio = _fv63;
          static XPLMDataRef r_h64 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
          float total = (r_h64 ? XPLMGetDataf(r_h64) : 0.0f);
-         float cap = conv::lbs_to_kg(ratio * total); // total is in lbs; cap in kg to match m_fuel
+         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
          if (cap <= 0.0f)
          {
            put<int32_t>(dst, 0);
@@ -70,8 +70,8 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
            XPLMGetDatavf(r_h66, &_fv66, 2, 1);
          float ratio = _fv66;
          static XPLMDataRef r_h67 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h67 ? XPLMGetDataf(r_h67) : 0.0f); // total is in lbs
-         put<int32_t>(dst, static_cast<int32_t>(conv::lbs_to_gallons(ratio * total)));
+         float total = (r_h67 ? XPLMGetDataf(r_h67) : 0.0f); // acf_m_fuel_tot is in kg
+         put<int32_t>(dst, static_cast<int32_t>(conv::kg_to_gallons(ratio * total)));
        },
        nullptr,
        "Center tank fuel capacity"},
@@ -89,7 +89,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
          float ratio = _fv68;
          static XPLMDataRef r_h69 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
          float total = (r_h69 ? XPLMGetDataf(r_h69) : 0.0f);
-         float cap = conv::lbs_to_kg(ratio * total); // total is in lbs; cap in kg to match m_fuel
+         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
          if (cap <= 0.0f)
          {
            put<int32_t>(dst, 0);
@@ -117,8 +117,8 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
            XPLMGetDatavf(r_h71, &_fv71, 0, 1);
          float ratio = _fv71;
          static XPLMDataRef r_h72 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h72 ? XPLMGetDataf(r_h72) : 0.0f); // total is in lbs
-         put<int32_t>(dst, static_cast<int32_t>(conv::lbs_to_gallons(ratio * total)));
+         float total = (r_h72 ? XPLMGetDataf(r_h72) : 0.0f); // acf_m_fuel_tot is in kg
+         put<int32_t>(dst, static_cast<int32_t>(conv::kg_to_gallons(ratio * total)));
        },
        nullptr,
        "Left tank fuel capacity"},
@@ -167,7 +167,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
          float ratio = _fv73;
          static XPLMDataRef r_h74 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
          float total = (r_h74 ? XPLMGetDataf(r_h74) : 0.0f);
-         float cap = conv::lbs_to_kg(ratio * total); // total is in lbs; cap in kg to match m_fuel
+         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
          if (cap <= 0.0f)
          {
            put<int32_t>(dst, 0);
@@ -189,8 +189,8 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
            XPLMGetDatavf(r_h73, &_fv73, 3, 1);
          float ratio = _fv73;
          static XPLMDataRef r_h74 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h74 ? XPLMGetDataf(r_h74) : 0.0f); // total is in lbs
-         float cap = conv::lbs_to_kg(ratio * total);         // convert to kg to match m_fuel
+         float total = (r_h74 ? XPLMGetDataf(r_h74) : 0.0f);
+         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
          if (cap <= 0.0f)
          {
            return;
@@ -231,7 +231,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
          float ratio = _fv76;
          static XPLMDataRef r_h77 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
          float total = (r_h77 ? XPLMGetDataf(r_h77) : 0.0f);
-         float cap = conv::lbs_to_kg(ratio * total); // total is in lbs; cap in kg to match m_fuel
+         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
          if (cap <= 0.0f)
          {
            put<int32_t>(dst, 0);
@@ -259,8 +259,8 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
            XPLMGetDatavf(r_h79, &_fv79, 1, 1);
          float ratio = _fv79;
          static XPLMDataRef r_h80 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h80 ? XPLMGetDataf(r_h80) : 0.0f); // total is in lbs
-         put<int32_t>(dst, static_cast<int32_t>(conv::lbs_to_gallons(ratio * total)));
+         float total = (r_h80 ? XPLMGetDataf(r_h80) : 0.0f); // acf_m_fuel_tot is in kg
+         put<int32_t>(dst, static_cast<int32_t>(conv::kg_to_gallons(ratio * total)));
        },
        nullptr,
        "Right tank fuel capacity"},
