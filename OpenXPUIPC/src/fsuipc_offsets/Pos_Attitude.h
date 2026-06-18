@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_pos_attitude()
 {
   static const std::vector<OffsetEntry> table = {
 
+
+      // ===== Pos./Attitude ==========================================
+
+      // Ground elevation — in metres * 256, See also 0B4C
       {0x0020, 4,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)

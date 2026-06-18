@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Fuel ===================================================
+//
+//       // Fuel weight — 256 * Lbs / Gal
 //       {0x0AF4, 2,
 //        // Read/Write: Read (only)
 //        [](uint8_t *dst, DataRefCache &dref)

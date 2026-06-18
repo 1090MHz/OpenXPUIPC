@@ -18,6 +18,12 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_misc()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Misc ===================================================
+//
+//       // Bleed air source control — Documented as 0=Min, 1=auto, 2=Off,
+//       // 3=APU, 4=Engines But in the FSX A321 these work: 0=Auto, 1=Shut
+//       // (off), 2=APU, 3=Engines
 //       {0x0B50, 1,
 //        // Read/Write: Read/Write
 //        [](uint8_t *dst, DataRefCache &dref)

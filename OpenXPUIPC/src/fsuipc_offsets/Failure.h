@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_failure()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Failure ================================================
+//
+//       // Fail hydraulics — 0=ok, 1=fail
 //       {0x0B62, 1,
 //        // Read/Write: Write (only)
 //        nullptr,

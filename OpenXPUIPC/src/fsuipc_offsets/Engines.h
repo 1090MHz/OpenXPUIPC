@@ -18,6 +18,11 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Engines ================================================
+//
+//       // Engine type — 0=Piston (and some Helos using the pistom model),
+//       // 1=Jet, 2=Sailplane, 3=Helo, 4=Rocket, 5=Turboprop
 //       {0x0609, 1,
 //        // Read/Write: Read (only)
 //        [](uint8_t *dst, DataRefCache &dref)

@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_unknown()
 {
   static const std::vector<OffsetEntry> table = {
 
+
+      // ===== Unknown ================================================
+
+      // Pressurisation: cabin altitude — In feet
       {0x0318, 4,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)

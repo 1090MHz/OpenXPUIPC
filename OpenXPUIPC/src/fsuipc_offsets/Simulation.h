@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Simulation =============================================
+//
+//       // Startup situation/flight — Path from FS folder is included.
 //       {0x0024, 256,
 //        // Read/Write: Read (only)
 //        [](uint8_t *dst, DataRefCache &dref)

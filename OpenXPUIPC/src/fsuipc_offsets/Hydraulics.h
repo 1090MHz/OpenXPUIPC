@@ -18,6 +18,11 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_hydraulics()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Hydraulics =============================================
+//
+//       // Hydraulic pump switches — Bit 0 (2^0) = pump 1 Bit 1 (2^1) = pump 2
+//       // Bit 2 (2^2) = pump 3 Bit 3 (2^3) = pump 4
 //       {0x341E, 1,
 //        // Read/Write: Read/Write
 //        [](uint8_t *dst, DataRefCache &dref)

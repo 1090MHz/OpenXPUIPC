@@ -18,6 +18,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_ai_traffic_tcas()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== AI-Traffic / TCAS ======================================
+//
+//       // AI ground traffic ATC id
 //       {0x0000, 15,
 //        // Read/Write: Read (only)
 //        [](uint8_t *dst, DataRefCache &dref)

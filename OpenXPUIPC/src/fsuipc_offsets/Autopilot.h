@@ -19,6 +19,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_autopilot()
 {
   static const std::vector<OffsetEntry> table = {
 
+//
+//       // ===== Autopilot ==============================================
+//
+//       // PM MCP lights — PM only
 //       {0x04F0, 2,
 //        // Read/Write: Read (only)
 //        [](uint8_t *dst, DataRefCache &dref)
