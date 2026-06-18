@@ -15,12 +15,16 @@
 #include <vector>
 #include <cstring>
 #include <fsuipc_offsets/fsuipc_offset_table.h>
+#include "cfg_offset_table.h"
 
 class Bridge {
 public:
     Bridge() {
         // Register all production-ready category offset tables
         register_fsuipc_offset_tables(*this);
+
+        // Register custom cfg table last so custom entries can override production offsets.
+        register_table(cfg_offset_table());
 
         // Pre-build a flat, cache-friendly list of readable entries for update().
         // Avoids per-call unordered_map bucket traversal overhead.
