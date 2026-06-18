@@ -160,6 +160,9 @@
       <AdditionalLibraryDirectories>..\third_party\libs\XPSDK430\Libraries\Win</AdditionalLibraryDirectories>
       <AdditionalDependencies>XPLM_64.lib;XPWidgets_64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(TargetDir)$(TargetName).xpl" "C:\X-Plane 12\Resources\plugins\$(TargetName)\win_x64\" /F /Y /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\plugin.cpp" />
