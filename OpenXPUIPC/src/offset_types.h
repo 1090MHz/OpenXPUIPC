@@ -10,6 +10,8 @@
 #include "dataref_cache.h"
 #include "impl/conversion.h"  // conv:: namespace (widely used across categories)
 #include <XPLMDataAccess.h>
+#include <XPLMPlanes.h>
+#include <XPLMUtilities.h>
 #include <cstdint>
 #include <cstring>
 #include <vector>
