@@ -97,4 +97,4 @@ The generator uses Jinja2 templates in `tools/python/templates/` and outputs one
 
 ## License
 
-LGPL-3.0-or-later — see [LICENSE](LICENSE).
+GPL-3.0-or-later — see [LICENSE](LICENSE).
