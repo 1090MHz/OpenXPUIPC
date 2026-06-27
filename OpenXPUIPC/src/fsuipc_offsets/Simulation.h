@@ -1868,20 +1868,41 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //            XPLMSetDatai(r, static_cast<int>(take<uint32_t>(src)));
 //        },
 //        "FSUIPC Option Settings"},
-//
-//       // Pushback State (FS2002+] — 3=off, 0=pushing back, 1=pushing back,
-//       // tail to left, 2=pushing back, tail to right
-//       {0x31F0, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x31F0");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Pushback State (FS2002+]"},
-//
+
+      // Pushback State (FS2002+] — 3=off, 0=pushing back, 1=pushing back,
+      // tail to left, 2=pushing back, tail to right
+      {0x31F0, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // pushback_attached: boolean, available XP 12.1.1+ (NULL on older versions)
+         static XPLMDataRef r_attached = XPLMFindDataRef("sim/aircraft/overflow/pushback_attached");
+         // towbar_heading_deg: float degrees, positive=right, available XP 11+
+         static XPLMDataRef r_heading  = XPLMFindDataRef("sim/graphics/animation/ground_traffic/towbar_heading_deg");
+
+         bool attached = r_attached ? XPLMGetDatai(r_attached) != 0 : false;
+
+         uint32_t state = 3; // Default: off
+         if (attached) {
+           if (r_heading) {
+             float heading = XPLMGetDataf(r_heading);
+             // Use 5-degree deadband to avoid noise when going straight
+             if (heading > 5.0f)
+               state = 1; // Tail to left (tug turned right)
+             else if (heading < -5.0f)
+               state = 2; // Tail to right (tug turned left)
+             else
+               state = 0; // Straight pushback
+           } else {
+             state = 0; // Attached but no heading info
+           }
+         }
+         put<uint32_t>(dst, state);
+       },
+       nullptr,
+       "Pushback State"},
+
 //       // Pushback Control [FS2002+] — Write 0=start, 1=tail left, 2=tail
 //       // right, 3=stop
 //       {0x31F4, 4,
