@@ -494,18 +494,20 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        nullptr,
 //        nullptr,
 //        "Airspeed Mach value"},
-//
-//       // No. of flap positions (not incl up)
-//       {0x3BF8, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3BF8");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "No. of flap positions (not incl up)"},
+
+      // No. of flap positions (not incl up)
+      {0x3BF8, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Get number of flap detents, subtract 1 to exclude "up" position
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/controls/acf_flap_detents");
+         int detents = r ? XPLMGetDatai(r) : 1;
+         put<uint16_t>(dst, static_cast<uint16_t>(detents > 0 ? detents - 1 : 0));
+       },
+       nullptr,
+       "No. of flap positions (not incl up)"},
 
       // Zero Fuel Weight — lbs * 256
       {0x3BFC, 4,
