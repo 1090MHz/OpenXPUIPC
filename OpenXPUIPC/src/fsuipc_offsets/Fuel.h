@@ -539,19 +539,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
 //        },
 //        nullptr,
 //        "Fuel flow at cruise, est (FSX)"},
-//
-//       // Empty weight (FSX) — Aircraft weight without payload or fuel. In
-//       // pounds * 256
-//       {0x1330, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1330");
-//          put<int32_t>(dst, static_cast<int32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Empty weight (FSX)"},
+
+      // Empty weight (FSX) — Aircraft weight without payload or fuel. In
+      // pounds * 256
+      {0x1330, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Empty weight: aircraft without fuel or payload
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_m_empty");
+         float kg = r ? XPLMGetDataf(r) : 0.0f;
+         put<int32_t>(dst, static_cast<int32_t>(kg * 2.20462f * 256.0f));
+       },
+       nullptr,
+       "Empty weight (lbs*256)"},
 
       // Max gross weight (FSX) — pounds * 256
       {0x1334, 4,
