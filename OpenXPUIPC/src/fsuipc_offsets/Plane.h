@@ -250,20 +250,31 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        },
 //        nullptr,
 //        "Mach maximum operating"},
-//
-//       // Payload station count (FS2004) — Up to 61 station details follow,
-//       // all with the same 48-byte structure
-//       {0x13FC, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x13FC");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Payload station count (FS2004)"},
-//
+
+      // Payload station count (FS2004) — Up to 61 station details follow,
+      // all with the same 48-byte structure
+      {0x13FC, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Count non-zero payload stations from acf_m_station_max array (9 stations max in X-Plane)
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_m_station_max");
+         uint32_t count = 0;
+         if (r) {
+           float stations[9] = {0};
+           int num_values = XPLMGetDatavf(r, stations, 0, 9);
+           for (int i = 0; i < num_values; i++) {
+             if (stations[i] > 0.0f) {
+               count++;
+             }
+           }
+         }
+         put<uint32_t>(dst, count);
+       },
+       nullptr,
+       "Payload station count"},
+
 //       // Payload weight lbs (FS2004) — Payload station 2-61 appear after
 //       // these, 48 bytes each
 //       {0x1400, 8,
