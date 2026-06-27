@@ -1795,30 +1795,27 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_controls()
 //        },
 //        nullptr,
 //        "Low vacuum [FS2000 only]"},
-//
-//       // Flap detent increment [FS2000+] — [FS2k only] The full range of flap
-//       // movement is 0-0x3FFF (16383). Each detent position or "notch" is
-//       // spaced equidistant in this range, no matter what flap angle is
-//       // represented -- a table in the AIR filegives those. To obtain the
-//       // numvber of detents, divide this increment value into 16384 and add
-//       // 1.
-//       {0x3BFA, 2,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3BFA");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3BFA");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint16_t>(src)));
-//        },
-//        "Flap detent increment [FS2000+]"},
+
+      // Flap detent increment [FS2000+] — [FS2k only] The full range of flap
+      // movement is 0-0x3FFF (16383). Each detent position or "notch" is
+      // spaced equidistant in this range, no matter what flap angle is
+      // represented -- a table in the AIR filegives those. To obtain the
+      // numvber of detents, divide this increment value into 16384 and add
+      // 1.
+      {0x3BFA, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Calculate increment: 16384 / (num_detents - 1)
+         // Formula: num_detents = 16384 / increment + 1
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/controls/acf_flap_detents");
+         int detents = r ? XPLMGetDatai(r) : 1;
+         uint16_t increment = (detents > 1) ? static_cast<uint16_t>(16384 / (detents - 1)) : 16384;
+         put<uint16_t>(dst, increment);
+       },
+       nullptr,
+       "Flap detent increment [FS2000+]"},
 
   }; // end table
   return table;
