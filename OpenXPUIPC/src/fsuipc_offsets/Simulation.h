@@ -1489,6 +1489,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        },
 //        "Aircraft shadows"},
 
+      // G-Force at touchdown (snapshot of 0x11BA captured at touchdown)
+      {0x11B8, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<int16_t>(dst, touchdown_gforce());
+       },
+       nullptr,
+       "G force at touchdown (raw * 625)"},
+
       // G-Force
       {0x11BA, 2,
        // Read/Write: Read (only)
