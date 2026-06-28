@@ -1868,20 +1868,57 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //            XPLMSetDatai(r, static_cast<int>(take<uint32_t>(src)));
 //        },
 //        "FSUIPC Option Settings"},
-//
-//       // Pushback State (FS2002+] — 3=off, 0=pushing back, 1=pushing back,
-//       // tail to left, 2=pushing back, tail to right
-//       {0x31F0, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x31F0");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Pushback State (FS2002+]"},
-//
+
+      // Pushback State (FS2002+] — 3=off, 0=pushing back, 1=pushing back,
+      // tail to left, 2=pushing back, tail to right
+      {0x31F0, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         
+         // === Pushback connection detection ===
+         static XPLMDataRef r_bp_connected = XPLMFindDataRef("bp/connected");
+         static XPLMDataRef r_attached = XPLMFindDataRef("sim/aircraft/overflow/pushback_attached");
+         
+         // === Tire rotation rates (array: [0]=nose, [1]=left main, [2]=right main) ===
+         static XPLMDataRef r_tire_rotation = XPLMFindDataRef("sim/flightmodel2/gear/tire_rotation_rate_rad_sec");
+         
+         uint32_t state = 3; // Default: off
+         
+         // Check if pushback is active (Better Pushback or X-Plane default)
+         bool connected = (r_bp_connected && XPLMGetDatai(r_bp_connected) == 1) ||
+                         (r_attached && XPLMGetDatai(r_attached) != 0);
+         
+         if (connected && r_tire_rotation) {
+           // Get tire rotation rates for left and right main gear
+           float tire_rates[10] = {0}; // Support up to 10 gear
+           int count = XPLMGetDatavf(r_tire_rotation, tire_rates, 0, 10);
+           
+           if (count >= 3) {
+             float left_main = tire_rates[1];   // Left main gear (rad/sec, negative when reversing)
+             float right_main = tire_rates[2];  // Right main gear
+             float diff = left_main - right_main;
+             
+             // During pushback (backward motion), wheels rotate negative
+             // Tail LEFT: right wheel (outside) faster → more negative → diff = left - right > 0
+             // Tail RIGHT: left wheel (outside) faster → more negative → diff = left - right < 0
+             // Use 0.1 rad/sec threshold to avoid noise
+             if (diff > 0.1f)
+               state = 1; // Right wheel faster (more negative) → tail to left
+             else if (diff < -0.1f)
+               state = 2; // Left wheel faster (more negative) → tail to right
+             else
+               state = 0; // Wheels at similar speed → straight pushback
+           } else {
+             state = 0; // Connected but can't determine direction
+           }
+         }
+         put<uint32_t>(dst, state);
+       },
+       nullptr,
+       "Pushback State"},
+
 //       // Pushback Control [FS2002+] — Write 0=start, 1=tail left, 2=tail
 //       // right, 3=stop
 //       {0x31F4, 4,

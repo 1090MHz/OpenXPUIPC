@@ -18,20 +18,26 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
 {
   static const std::vector<OffsetEntry> table = {
 
-//
-//       // ===== Fuel ===================================================
-//
-//       // Fuel weight — 256 * Lbs / Gal
-//       {0x0AF4, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0AF4");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Fuel weight"},
+
+      // ===== Fuel ===================================================
+
+      // Fuel weight — 256 * Lbs / Gal
+      // Note: this means fuel weight per gallon — Weight of one gallon of fuel (256 * Lbs / Gal)
+      // This is fuel density, NOT total fuel weight
+      {0x0AF4, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Get fuel density based on engine type:
+         // - Piston engines (recip carb/injected) use AvGas: 6.0 lbs/gal
+         // - Jet/turbine engines use Jet-A: 6.699219 lbs/gal
+         float density = conv::get_fuel_density_lbs_per_gallon();
+         int16_t fsuipc_value = static_cast<int16_t>(density * 256.0f);
+         put<int16_t>(dst, fsuipc_value);
+       },
+       nullptr,
+       "Fuel density (lbs/gal * 256)"},
 
       // Fuel Centre Level (%) — 100% = 128 x 65536
       {0x0B74, 4,
@@ -539,19 +545,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
 //        },
 //        nullptr,
 //        "Fuel flow at cruise, est (FSX)"},
-//
-//       // Empty weight (FSX) — Aircraft weight without payload or fuel. In
-//       // pounds * 256
-//       {0x1330, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1330");
-//          put<int32_t>(dst, static_cast<int32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Empty weight (FSX)"},
+
+      // Empty weight (FSX) — Aircraft weight without payload or fuel. In
+      // pounds * 256
+      {0x1330, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Empty weight: aircraft without fuel or payload
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_m_empty");
+         float kg = r ? XPLMGetDataf(r) : 0.0f;
+         put<int32_t>(dst, static_cast<int32_t>(kg * 2.20462f * 256.0f));
+       },
+       nullptr,
+       "Empty weight (lbs*256)"},
 
       // Max gross weight (FSX) — pounds * 256
       {0x1334, 4,

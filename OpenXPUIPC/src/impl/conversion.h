@@ -3,13 +3,53 @@
 #pragma once
 #include <cmath>
 #include <cstdint>
+#include "XPLMDataAccess.h"
 
 namespace conv {
 
+// Fuel density constants
+constexpr float AVGAS_DENSITY_LBS_GAL = 6.0f;        // Aviation gasoline (piston engines)
+constexpr float JETA_DENSITY_LBS_GAL = 6.699219f;   // Jet-A fuel (turbine/jet engines)
+
+// Get fuel density based on aircraft engine type
+// Returns lbs/gallon based on first engine's type from sim/aircraft/prop/acf_en_type
+// Piston engines (0=recip carb, 1=recip injected) use AvGas (6.0 lbs/gal)
+// Jet/turbine engines (5=single jet, 7=multi jet, 9=free turboprop, 10=fixed turboprop) use Jet-A (6.699219 lbs/gal)
+inline float get_fuel_density_lbs_per_gallon()
+{
+    static XPLMDataRef engine_type_ref = XPLMFindDataRef("sim/aircraft/prop/acf_en_type");
+    if (!engine_type_ref)
+        return JETA_DENSITY_LBS_GAL; // Default to Jet-A if dataref unavailable
+    
+    int engine_type = 0;
+    XPLMGetDatavi(engine_type_ref, &engine_type, 0, 1); // Read first engine
+    
+    // Engine types: 0=recip carb, 1=recip injected, 3=electric, 5=single jet,
+    //               6=rocket, 7=multi jet, 9=free turboprop, 10=fixed turboprop
+    switch (engine_type) {
+        case 0: // Reciprocating carburetor (piston)
+        case 1: // Reciprocating injected (piston)
+            return AVGAS_DENSITY_LBS_GAL;
+        
+        case 5:  // Single spool jet
+        case 7:  // Multi spool jet
+        case 9:  // Free turboprop
+        case 10: // Fixed turboprop
+            return JETA_DENSITY_LBS_GAL;
+        
+        default: // Electric (3), rocket (6), or unknown - default to Jet-A
+            return JETA_DENSITY_LBS_GAL;
+    }
+}
+
+// Basic conversions
 inline float kg_to_lbs(float kg)           { return kg / 0.45359237f; }
 inline float lbs_to_kg(float lbs)          { return lbs * 0.45359237f; }
-inline float kg_to_gallons(float kg)       { return kg_to_lbs(kg) / 6.699219f; }
-inline float lbs_to_gallons(float lbs)    { return lbs / 6.699219f; }
+
+// Fuel conversions - use dynamic density based on engine type
+inline float kg_to_gallons(float kg)       { return kg_to_lbs(kg) / get_fuel_density_lbs_per_gallon(); }
+inline float lbs_to_gallons(float lbs)     { return lbs / get_fuel_density_lbs_per_gallon(); }
+
 inline float meters_to_knots(float mps)    { return mps * 1.9438444924406f; }
 
 inline float inch_to_hpa(float inch) {

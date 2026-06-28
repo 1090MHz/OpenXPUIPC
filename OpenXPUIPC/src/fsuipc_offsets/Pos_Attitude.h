@@ -13,6 +13,7 @@
 #pragma once
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
+#include "impl/touchdown.h"  // touchdown_vs()
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_pos_attitude()
 {
@@ -123,18 +124,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_pos_attitude()
 //        },
 //        nullptr,
 //        "Whiskey Compass"},
-//
-//       // Vertical speed at touchdown — VSI / 256 = VS per sec (in meters)
-//       {0x030C, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x030C");
-//          put<int32_t>(dst, static_cast<int32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Vertical speed at touchdown"},
+
+      // Vertical speed at touchdown — VSI / 256 = VS per sec (in meters)
+      {0x030C, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<int32_t>(dst, touchdown_vs());
+       },
+       nullptr,
+       "Vertical speed at touchdown"},
 
       // Plane on ground — 0=Airborne, 1=On Ground (NB not changed in Slew
       // mode)

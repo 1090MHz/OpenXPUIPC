@@ -250,20 +250,31 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        },
 //        nullptr,
 //        "Mach maximum operating"},
-//
-//       // Payload station count (FS2004) — Up to 61 station details follow,
-//       // all with the same 48-byte structure
-//       {0x13FC, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x13FC");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Payload station count (FS2004)"},
-//
+
+      // Payload station count (FS2004) — Up to 61 station details follow,
+      // all with the same 48-byte structure
+      {0x13FC, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Count non-zero payload stations from acf_m_station_max array (9 stations max in X-Plane)
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_m_station_max");
+         uint32_t count = 0;
+         if (r) {
+           float stations[9] = {0};
+           int num_values = XPLMGetDatavf(r, stations, 0, 9);
+           for (int i = 0; i < num_values; i++) {
+             if (stations[i] > 0.0f) {
+               count++;
+             }
+           }
+         }
+         put<uint32_t>(dst, count);
+       },
+       nullptr,
+       "Payload station count"},
+
 //       // Payload weight lbs (FS2004) — Payload station 2-61 appear after
 //       // these, 48 bytes each
 //       {0x1400, 8,
@@ -494,18 +505,20 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        nullptr,
 //        nullptr,
 //        "Airspeed Mach value"},
-//
-//       // No. of flap positions (not incl up)
-//       {0x3BF8, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3BF8");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "No. of flap positions (not incl up)"},
+
+      // No. of flap positions (not incl up)
+      {0x3BF8, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Get number of flap detents, subtract 1 to exclude "up" position
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/controls/acf_flap_detents");
+         int detents = r ? XPLMGetDatai(r) : 1;
+         put<uint16_t>(dst, static_cast<uint16_t>(detents > 0 ? detents - 1 : 0));
+       },
+       nullptr,
+       "No. of flap positions (not incl up)"},
 
       // Zero Fuel Weight — lbs * 256
       {0x3BFC, 4,
