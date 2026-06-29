@@ -190,11 +190,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // static XPLMDataRef r_h109 = XPLMFindDataRef("sim/weather/aircraft/wind_speed_kts");
-         static XPLMDataRef r_h109 = XPLMFindDataRef("sim/cockpit2/gauges/indicators/wind_speed_kts");
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/wind_speed_kts");
          float _wsp = 0.0f;
-         if (r_h109)
-           XPLMGetDatavf(r_h109, &_wsp, 0, 1);
+         if (r)
+           _wsp = XPLMGetDataf(r);
          put<int16_t>(dst, static_cast<int16_t>(_wsp));
        },
        nullptr,
@@ -207,10 +206,10 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h110 = XPLMFindDataRef("sim/weather/aircraft/wind_now_direction_degt");
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/wind_heading_deg_mag");
          float _wdir = 0.0f;
-         if (r_h110)
-           XPLMGetDatavf(r_h110, &_wdir, 0, 1);
+         if (r)
+           _wdir = XPLMGetDataf(r);
          put<uint16_t>(dst, static_cast<uint16_t>(_wdir / 360.0f * 65536.0f));
        },
        nullptr,
