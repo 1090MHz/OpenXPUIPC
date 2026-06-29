@@ -275,68 +275,418 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
        nullptr,
        "Payload station count"},
 
-//       // Payload weight lbs (FS2004) — Payload station 2-61 appear after
-//       // these, 48 bytes each
-//       {0x1400, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1400");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "Payload weight lbs (FS2004)"},
-//
-//       // Payload lateral feet (FS2004)
-//       {0x1408, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1408");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "Payload lateral feet (FS2004)"},
-//
-//       // Payload vertical feet (FS2004)
-//       {0x1410, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1410");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "Payload vertical feet (FS2004)"},
-//
-//       // Payload longitudinal feet (FS2004)
-//       {0x1418, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1418");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "Payload longitudinal feet (FS2004)"},
-//
-//       // Payload name (16 ch ASCIIZ) (FS2004)
-//       {0x1420, 16,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1420");
-//          // TODO: string — XPLMGetDatab(r, (char*)dst, 0, 16);
-//          dst[0] = 0;
-//        },
-//        nullptr,
-//        "Payload name (16 ch ASCIIZ) (FS2004)"},
-//
+      // Payload station data (FS2004+)
+      // Each station is 48 bytes: weight(8), lateral(8), vertical(8), longitudinal(8), name(16)
+      // X-Plane supports up to 9 payload stations
+      
+      // Station 1: Weight (lbs)
+      {0x1400, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 0, 1);
+           put<double>(dst, weight_kg * 2.20462); // kg to lbs
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 1 weight (lbs)"},
+
+      // Station 1: Lateral distance from datum (feet)
+      {0x1408, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 0, 1);
+           put<double>(dst, pos_m * 3.28084); // meters to feet
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 1 lateral distance (ft)"},
+
+      // Station 1: Vertical distance from datum (feet)
+      {0x1410, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 0, 1);
+           put<double>(dst, pos_m * 3.28084); // meters to feet
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 1 vertical distance (ft)"},
+
+      // Station 1: Longitudinal distance from datum (feet)
+      {0x1418, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 0, 1);
+           put<double>(dst, pos_m * 3.28084); // meters to feet
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 1 longitudinal distance (ft)"},
+
+      // Station 2: Weight (lbs)
+      {0x1430, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 1, 1);
+           put<double>(dst, weight_kg * 2.20462);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 2 weight (lbs)"},
+
+      // Station 2: Lateral distance from datum (feet)
+      {0x1438, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 1, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 2 lateral distance (ft)"},
+
+      // Station 2: Vertical distance from datum (feet)
+      {0x1440, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 1, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 2 vertical distance (ft)"},
+
+      // Station 2: Longitudinal distance from datum (feet)
+      {0x1448, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 1, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 2 longitudinal distance (ft)"},
+
+      // Station 3: Weight (lbs)
+      {0x1460, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 2, 1);
+           put<double>(dst, weight_kg * 2.20462);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 3 weight (lbs)"},
+
+      // Station 3: Lateral distance from datum (feet)
+      {0x1468, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 2, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 3 lateral distance (ft)"},
+
+      // Station 3: Vertical distance from datum (feet)
+      {0x1470, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 2, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 3 vertical distance (ft)"},
+
+      // Station 3: Longitudinal distance from datum (feet)
+      {0x1478, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 2, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 3 longitudinal distance (ft)"},
+
+      // Station 4: Weight (lbs)
+      {0x1490, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 3, 1);
+           put<double>(dst, weight_kg * 2.20462);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 4 weight (lbs)"},
+
+      // Station 4: Lateral distance from datum (feet)
+      {0x1498, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 3, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 4 lateral distance (ft)"},
+
+      // Station 4: Vertical distance from datum (feet)
+      {0x14A0, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 3, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 4 vertical distance (ft)"},
+
+      // Station 4: Longitudinal distance from datum (feet)
+      {0x14A8, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 3, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 4 longitudinal distance (ft)"},
+
+      // Station 5: Weight (lbs)
+      {0x14C0, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 4, 1);
+           put<double>(dst, weight_kg * 2.20462);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 5 weight (lbs)"},
+
+      // Station 5: Lateral distance from datum (feet)
+      {0x14C8, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 4, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 5 lateral distance (ft)"},
+
+      // Station 5: Vertical distance from datum (feet)
+      {0x14D0, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 4, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 5 vertical distance (ft)"},
+
+      // Station 5: Longitudinal distance from datum (feet)
+      {0x14D8, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 4, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 5 longitudinal distance (ft)"},
+
+      // Station 6: Weight (lbs)
+      {0x14F0, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 5, 1);
+           put<double>(dst, weight_kg * 2.20462);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 6 weight (lbs)"},
+
+      // Station 6: Lateral distance from datum (feet)
+      {0x14F8, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 5, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 6 lateral distance (ft)"},
+
+      // Station 6: Vertical distance from datum (feet)
+      {0x1500, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 5, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 6 vertical distance (ft)"},
+
+      // Station 6: Longitudinal distance from datum (feet)
+      {0x1508, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 5, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 6 longitudinal distance (ft)"},
+
 //       // Left folding wing %
 //       {0x2A48, 8,
 //        // Read/Write: Unknown
