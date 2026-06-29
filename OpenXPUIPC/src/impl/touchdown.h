@@ -63,7 +63,7 @@ inline int32_t touchdown_vs()
 inline int16_t touchdown_gforce()
 {
     static XPLMDataRef r_on_ground = XPLMFindDataRef("sim/flightmodel/failures/onground_any");
-    static XPLMDataRef r_gforce    = XPLMFindDataRef("sim/cockpit2/gauges/indicators/Gload_normal_g");
+    static XPLMDataRef r_gforce    = XPLMFindDataRef("sim/flightmodel/forces/g_nrml");
 
     static bool    on_ground_last_frame    = false; // aircraft on ground during previous frame
     static int16_t peak_g                  = 0;     // peak G-force captured after touchdown
