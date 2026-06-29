@@ -201,7 +201,8 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        nullptr,
        "Wind speed (kts)"},
 
-      // Ambient wind direction — 65536 = 360 degrees true
+      // Ambient wind direction — 65536 = 360, N.B. Degrees MAG for surface
+      // layer, TRUE for others (see 0EEE for altitude)
       {0x0E92, 2,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
