@@ -1489,15 +1489,26 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        },
 //        "Aircraft shadows"},
 
+      // G-Force at touchdown (snapshot of 0x11BA captured at touchdown)
+      {0x11B8, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<int16_t>(dst, touchdown_gforce());
+       },
+       nullptr,
+       "G force at touchdown (raw * 625)"},
+
       // G-Force
       {0x11BA, 2,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // Gload_normal_g returns 1.0 in level/1G flight, matching legacy FSUIPC (625 = 1G).
+         // g_nrml returns 1.0 in level/1G flight, matching legacy FSUIPC (625 = 1G).
          // local_ay (kinematic acceleration) was ≈0 in level flight, giving wrong 0 result.
-         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/Gload_normal_g");
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/forces/g_nrml");
          float g = r ? XPLMGetDataf(r) : 1.0f;
          put<int16_t>(dst, static_cast<int16_t>(g * 625.0f));
        },

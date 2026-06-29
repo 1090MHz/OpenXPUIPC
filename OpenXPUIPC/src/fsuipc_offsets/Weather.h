@@ -184,17 +184,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
 //        nullptr,
 //        "Dew point"},
 
-      // Ambient wind speed — knots
+      // Ambient wind speed — knots (at aircraft)
       {0x0E90, 2,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // static XPLMDataRef r_h109 = XPLMFindDataRef("sim/weather/aircraft/wind_speed_kts");
-         static XPLMDataRef r_h109 = XPLMFindDataRef("sim/cockpit2/gauges/indicators/wind_speed_kts");
+         // Use element 1 from weather arrays (element 0 appears to be unreliable)
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_speed_kts");
          float _wsp = 0.0f;
-         if (r_h109)
-           XPLMGetDatavf(r_h109, &_wsp, 0, 1);
+         if (r) {
+           XPLMGetDatavf(r, &_wsp, 1, 1); // Read element 1
+         }
          put<int16_t>(dst, static_cast<int16_t>(_wsp));
        },
        nullptr,
@@ -207,14 +208,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h110 = XPLMFindDataRef("sim/weather/aircraft/wind_now_direction_degt");
+         // Use element 1 - already in true degrees (0-360)
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_direction_degt");
          float _wdir = 0.0f;
-         if (r_h110)
-           XPLMGetDatavf(r_h110, &_wdir, 0, 1);
+         if (r) {
+           XPLMGetDatavf(r, &_wdir, 1, 1); // Read element 1
+         }
+         // Convert to FSUIPC format: 65536 = 360 degrees
          put<uint16_t>(dst, static_cast<uint16_t>(_wdir / 360.0f * 65536.0f));
        },
        nullptr,
-       "Wind direction"},
+       "Wind direction (degrees true)"},
 //
 //       // Upper cloud ceiling — metres AMSL
 //       {0x0E9A, 2,
