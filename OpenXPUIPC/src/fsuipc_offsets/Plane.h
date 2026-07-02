@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // fsuipc_offsets/Plane.h — Production offset table
 //
-// 43 total offsets in this category
+// 58 total offsets in this category
 // (TODO entries are commented out with implementation instructions)
 //
 // TO IMPLEMENT A NEW OFFSET:
@@ -13,6 +13,7 @@
 #pragma once
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
+#include "impl/aircraft_config.h"
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 {
@@ -347,6 +348,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
        nullptr,
        "Payload station 1 longitudinal distance (ft)"},
 
+      // Station 1: Name (16 bytes, null-padded)
+      {0x1420, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(0);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 1 name"},
+
       // Station 2: Weight (lbs)
       {0x1430, 8,
        [](uint8_t *dst, DataRefCache &dref)
@@ -414,6 +426,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
        },
        nullptr,
        "Payload station 2 longitudinal distance (ft)"},
+
+      // Station 2: Name (16 bytes, null-padded)
+      {0x1450, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(1);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 2 name"},
 
       // Station 3: Weight (lbs)
       {0x1460, 8,
@@ -483,6 +506,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
        nullptr,
        "Payload station 3 longitudinal distance (ft)"},
 
+      // Station 3: Name (16 bytes, null-padded)
+      {0x1480, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(2);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 3 name"},
+
       // Station 4: Weight (lbs)
       {0x1490, 8,
        [](uint8_t *dst, DataRefCache &dref)
@@ -550,6 +584,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
        },
        nullptr,
        "Payload station 4 longitudinal distance (ft)"},
+
+      // Station 4: Name (16 bytes, null-padded)
+      {0x14B0, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(3);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 4 name"},
 
       // Station 5: Weight (lbs)
       {0x14C0, 8,
@@ -619,6 +664,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
        nullptr,
        "Payload station 5 longitudinal distance (ft)"},
 
+      // Station 5: Name (16 bytes, null-padded)
+      {0x14E0, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(4);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 5 name"},
+
       // Station 6: Weight (lbs)
       {0x14F0, 8,
        [](uint8_t *dst, DataRefCache &dref)
@@ -686,6 +742,254 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
        },
        nullptr,
        "Payload station 6 longitudinal distance (ft)"},
+
+      // Station 6: Name (16 bytes, null-padded)
+      {0x1510, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(5);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 6 name"},
+
+      // Station 7: Weight (lbs)
+      {0x1520, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 6, 1);
+           put<double>(dst, weight_kg * 2.20462);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 7 weight (lbs)"},
+
+      // Station 7: Lateral distance from datum (feet)
+      {0x1528, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 6, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 7 lateral distance (ft)"},
+
+      // Station 7: Vertical distance from datum (feet)
+      {0x1530, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 6, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 7 vertical distance (ft)"},
+
+      // Station 7: Longitudinal distance from datum (feet)
+      {0x1538, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 6, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 7 longitudinal distance (ft)"},
+
+      // Station 7: Name (16 bytes, null-padded)
+      {0x1540, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(6);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 7 name"},
+
+      // Station 8: Weight (lbs)
+      {0x1550, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 7, 1);
+           put<double>(dst, weight_kg * 2.20462);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 8 weight (lbs)"},
+
+      // Station 8: Lateral distance from datum (feet)
+      {0x1558, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 7, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 8 lateral distance (ft)"},
+
+      // Station 8: Vertical distance from datum (feet)
+      {0x1560, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 7, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 8 vertical distance (ft)"},
+
+      // Station 8: Longitudinal distance from datum (feet)
+      {0x1568, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 7, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 8 longitudinal distance (ft)"},
+
+      // Station 8: Name (16 bytes, null-padded)
+      {0x1570, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(7);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 8 name"},
+
+      // Station 9: Weight (lbs)
+      {0x1580, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_stations");
+         if (r) {
+           float weight_kg = 0.0f;
+           XPLMGetDatavf(r, &weight_kg, 8, 1);
+           put<double>(dst, weight_kg * 2.20462);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 9 weight (lbs)"},
+
+      // Station 9: Lateral distance from datum (feet)
+      {0x1588, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_z");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 8, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 9 lateral distance (ft)"},
+
+      // Station 9: Vertical distance from datum (feet)
+      {0x1590, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_y");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 8, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 9 vertical distance (ft)"},
+
+      // Station 9: Longitudinal distance from datum (feet)
+      {0x1598, 8,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/weight/acf_stations_ref_x");
+         if (r) {
+           float pos_m = 0.0f;
+           XPLMGetDatavf(r, &pos_m, 8, 1);
+           put<double>(dst, pos_m * 3.28084);
+         } else {
+           put<double>(dst, 0.0);
+         }
+       },
+       nullptr,
+       "Payload station 9 longitudinal distance (ft)"},
+
+      // Station 9: Name (16 bytes, null-padded)
+      {0x15A0, 16,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         const char* name = aircraft_config::get_station_name(8);
+         std::memcpy(dst, name, 16);
+       },
+       nullptr,
+       "Payload station 9 name"},
 
 //       // Left folding wing %
 //       {0x2A48, 8,

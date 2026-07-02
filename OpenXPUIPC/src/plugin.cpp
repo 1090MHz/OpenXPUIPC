@@ -20,6 +20,7 @@
 #ifdef _WIN32
 #include "ipc_server.h"
 #endif
+#include "impl/aircraft_config.h"
 
 #include <XPLMPlugin.h>
 #include <XPLMUtilities.h>
@@ -239,6 +240,20 @@ PLUGIN_API void XPluginStop()
     XPlaneLog::shutdown();
 }
 
-PLUGIN_API void XPluginReceiveMessage(XPLMPluginID, int, void *)
+PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void *inParam)
 {
+    (void)inFrom; // unused
+
+    // XPLM_MSG_PLANE_LOADED = 102
+    // inParam: 0 = user aircraft, 1-19 = AI aircraft
+    if (inMsg == 102)
+    {
+        int aircraft_index = static_cast<int>(reinterpret_cast<intptr_t>(inParam));
+        if (aircraft_index == 0)
+        {
+            // User aircraft loaded — reload aircraft-specific configuration
+            XPLANE_LOG_INFO("User aircraft loaded - reloading aircraft configuration (payload stations, etc.)");
+            aircraft_config::reload();
+        }
+    }
 }
