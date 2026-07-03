@@ -13,6 +13,7 @@
 #pragma once
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
+#include "impl/sim_state.h"
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 {
@@ -2417,31 +2418,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        },
 //        "Virtual Buttons, Joy #72"},
 //
-//       // FS2004 ready to fly flag — FS2004, zero = ready to fly (always zero
-//       // before FS2004)
-//       {0x3364, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3364");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "FS2004 ready to fly flag"},
-//
-//       // Paused in menu flag — NZ means FS is in a menu or frozen whilst a
-//       // resulting amodal dialogue is used
-//       {0x3365, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3365");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Paused in menu flag"},
+      // Ready-to-fly flag — FSUIPC semantics: 0 = ready, non-zero = loading
+      // / transition state.
+      {0x3364, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+         put<uint8_t>(dst, sim_state::fsuipc_ready_to_fly_flag());
+       },
+       nullptr,
+       "Ready-to-fly flag (0=ready, NZ=loading)"},
+
+      // Menu/dialog unavailable flag — FSUIPC semantics: non-zero means sim
+      // unavailable due to menus/dialogs.
+      {0x3365, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+        // Detects menu/pause by tracking if sim/time/total_flight_time_sec advances. 
+        put<uint8_t>(dst, sim_state::fsuipc_menu_dialog_flag());
+       },
+       nullptr,
+       "Menu/dialog unavailable flag"},
 //
 //       // PFC MCP events flags — Flags for PFC's MCP buttons. See PFC.DLL docs
 //       {0x3368, 4,
