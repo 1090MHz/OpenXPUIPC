@@ -34,29 +34,41 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        nullptr,
 //        "Engine type"},
 //
-//       // Has mixture control
-//       {0x0780, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0780");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Has mixture control"},
-//
-//       // Has carb heat control
-//       {0x0784, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0784");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Has carb heat control"},
+      // Has mixture control
+      {0x0780, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Engine type: 0=recip carb, 1=recip injected (both have mixture)
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/prop/acf_en_type");
+         int eng_type = 0;
+         if (r)
+           XPLMGetDatavi(r, &eng_type, 0, 1);
+         // Has mixture if engine type is 0 (recip carb) or 1 (recip injected)
+         uint32_t has_mix = (eng_type == 0 || eng_type == 1) ? 1 : 0;
+         put<uint32_t>(dst, has_mix);
+       },
+       nullptr,
+       "Has mixture control"},
+
+      // Has carb heat control
+      {0x0784, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Engine type: 0=recip carb (only carbureted engines have carb heat)
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/prop/acf_en_type");
+         int eng_type = 0;
+         if (r)
+           XPLMGetDatavi(r, &eng_type, 0, 1);
+         // Has carb heat only if engine type is 0 (recip carb)
+         uint32_t has_carb = (eng_type == 0) ? 1 : 0;
+         put<uint32_t>(dst, has_carb);
+       },
+       nullptr,
+       "Has carb heat control"},
 
       // ENG1 Throttle lever — -16384 (or max reverse, usually nearer -4096)
       // to +16384
@@ -1009,17 +1021,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        },
 //        "ENG3 Starter switch pos"},
 //
-//       // ENG3 Combustion flag — 0=Eng not running, 1=running
-//       {0x09C4, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x09C4");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "ENG3 Combustion flag"},
+      // ENG3 Combustion flag — 0=Eng not running, 1=running
+      {0x09C4, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Engine 3 combustion flag: TRUE (1) if engine is firing
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/engine/ENGN_running");
+         int v = 0;
+         if (r)
+           XPLMGetDatavi(r, &v, 2, 1);
+         put<int16_t>(dst, static_cast<int16_t>(v));
+       },
+       nullptr,
+       "Engine 3 combustion flag"},
 //
 //       // ENG3 N2 — Percent*16384
 //       {0x09C6, 2,
@@ -1386,17 +1402,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        },
 //        "ENG4 Starter switch pos"},
 //
-//       // ENG4 Combustion flag — 0=Eng not running, 1=running
-//       {0x0A5C, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0A5C");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "ENG4 Combustion flag"},
+      // ENG4 Combustion flag — 0=Eng not running, 1=running
+      {0x0A5C, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Engine 4 combustion flag: TRUE (1) if engine is firing
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/engine/ENGN_running");
+         int v = 0;
+         if (r)
+           XPLMGetDatavi(r, &v, 3, 1);
+         put<int16_t>(dst, static_cast<int16_t>(v));
+       },
+       nullptr,
+       "Engine 4 combustion flag"},
 //
 //       // ENG4 N2 — Percent*16384
 //       {0x0A5E, 2,
