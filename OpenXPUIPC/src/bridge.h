@@ -11,11 +11,13 @@
 #pragma once
 
 #include <XPlaneUtilities/XPlaneLog.h>
+#include <XPLMDataAccess.h>
 #include <unordered_map>
 #include <vector>
 #include <cstring>
 #include <fsuipc_offsets/fsuipc_offset_table.h>
 #include "cfg_offset_table.h"
+#include "impl/sim_state.h"
 
 class Bridge {
 public:
@@ -49,6 +51,13 @@ public:
         // 2. Refresh all read entries into buf_ via pre-built flat list
         for (const auto& [off, entry] : read_list_)
             entry->read(buf_ + off, dr_);
+
+        // 3. Update flight-time tracking for menu/pause detection
+        static XPLMDataRef r_flight_time = XPLMFindDataRef("sim/time/total_flight_time_sec");
+        if (r_flight_time) {
+            float current_time = XPLMGetDataf(r_flight_time);
+            sim_state::update_flight_time(current_time);
+        }
     }
 
     // Read `size` bytes starting at `offset` into `dst`.

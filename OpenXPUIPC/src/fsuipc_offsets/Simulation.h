@@ -13,6 +13,7 @@
 #pragma once
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
+#include "impl/sim_state.h"
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 {
@@ -551,18 +552,20 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        nullptr,
 //        "Name of last saved flight"},
 //
-//       // Elapsed time — Counts simiulated time, seconds. Accurate to
-//       // fractions but only updated on a frame basis
-//       {0x04A8, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x04A8");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "Elapsed time"},
+      // Elapsed time — Sim elapsed time in seconds (fractional)
+      {0x04A8, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+         // Total time since the flight got reset by something
+         static XPLMDataRef r_flight = XPLMFindDataRef("sim/time/total_flight_time_sec");
+         double t = 0.0;
+         if (r_flight)
+           t = static_cast<double>(XPLMGetDataf(r_flight));
+         put<double>(dst, t);
+       },
+       nullptr,
+       "Elapsed time"},
 //
 //       // Smoke system available (<= FS2000) — 0=No smoke available, 1=Smoke
 //       // system fitted
@@ -1592,39 +1595,36 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //            XPLMSetDatai(r, static_cast<int>(take<int32_t>(src)));
 //        },
 //        "AI traffic control parameter"},
-//
-//       // Hot buttons: # of slots — No. of FSUIPC Hot joystick button slots
-//       // following
-//       {0x290C, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x290C");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Hot buttons: # of slots"},
-//
-//       // Hot Button Joystick + 128 — Joystick number 0-15 plus 128. 0 if slot
-//       // free
-//       {0x2910, 1,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x2910");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x2910");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
-//        },
-//        "Hot Button Joystick + 128"},
+
+       // Hot buttons: # of slots — No. of FSUIPC Hot joystick button slots
+       // following
+       {0x290C, 4,
+        // Read/Write: Read (only)
+        [](uint8_t *dst, DataRefCache &)
+        {
+           // FSUIPC Hot Button slots are not implemented by OpenXPUIPC.
+           // Report zero available slots.
+          put<uint32_t>(dst, 0);
+        },
+        nullptr,
+        "Hot buttons: # of slots"},
+
+       // Hot Button Joystick + 128 — Joystick number 0-15 plus 128. 0 if slot
+       // free
+       {0x2910, 1,
+        // Read/Write: Read/Write
+        [](uint8_t *dst, DataRefCache &)
+        {
+           // FSUIPC Hot Button slot table is not implemented by OpenXPUIPC.
+           // Report slot free.
+          put<uint8_t>(dst, 0);
+        },
+        [](const uint8_t *, uint32_t, DataRefCache &)
+        {
+           // FSUIPC Hot Button slot table is not implemented by OpenXPUIPC.
+           // Ignore writes.
+        },
+        "Hot Button Joystick + 128"},
 //
 //       // Hot Button number 0-39 — Buttons 0-31 are normal, 32-39 are the hat
 //       // positons or "points of view".
@@ -1987,18 +1987,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //            XPLMSetDatai(r, static_cast<int>(take<uint32_t>(src)));
 //        },
 //        "Key press to FS"},
-//
-//       // Hot keys: # of slots — Number of FSUIPC hot key slots following
-//       {0x320C, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x320C");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Hot keys: # of slots"},
+
+       // Hot keys: # of slots — Number of FSUIPC hot key slots following
+       {0x320C, 4,
+        // Read/Write: Read (only)
+        [](uint8_t *dst, DataRefCache &)
+        {
+           // FSUIPC Hot Key slots are not implemented by OpenXPUIPC.
+           // Report zero available slots.
+          put<uint32_t>(dst, 0);
+        },
+        nullptr,
+        "Hot keys: # of slots"},
 //
 //       // Hot Key keycode — Virtual keycode for hotkey
 //       {0x3210, 1,
@@ -2420,31 +2420,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        },
 //        "Virtual Buttons, Joy #72"},
 //
-//       // FS2004 ready to fly flag — FS2004, zero = ready to fly (always zero
-//       // before FS2004)
-//       {0x3364, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3364");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "FS2004 ready to fly flag"},
-//
-//       // Paused in menu flag — NZ means FS is in a menu or frozen whilst a
-//       // resulting amodal dialogue is used
-//       {0x3365, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3365");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Paused in menu flag"},
+      // Ready-to-fly flag — FSUIPC semantics: 0 = ready, non-zero = loading
+      // / transition state.
+      {0x3364, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+         put<uint8_t>(dst, sim_state::fsuipc_ready_to_fly_flag());
+       },
+       nullptr,
+       "Ready-to-fly flag (0=ready, NZ=loading)"},
+
+      // Menu/dialog unavailable flag — FSUIPC semantics: non-zero means sim
+      // unavailable due to menus/dialogs.
+      {0x3365, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+        // Detects menu/pause by tracking if sim/time/total_flight_time_sec advances. 
+        put<uint8_t>(dst, sim_state::fsuipc_menu_dialog_flag());
+       },
+       nullptr,
+       "Menu/dialog unavailable flag"},
 //
 //       // PFC MCP events flags — Flags for PFC's MCP buttons. See PFC.DLL docs
 //       {0x3368, 4,

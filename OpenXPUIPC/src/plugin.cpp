@@ -21,6 +21,7 @@
 #include "ipc_server.h"
 #endif
 #include "impl/aircraft_config.h"
+#include "impl/sim_state.h"
 
 #include <XPLMPlugin.h>
 #include <XPLMUtilities.h>
@@ -168,6 +169,7 @@ PLUGIN_API int XPluginStart(char *name, char *sig, char *desc)
     spdlog::flush_on(spdlog::level::debug);
 #endif
     XPLANE_LOG_INFO("OpenXPUIPC v1.0.0 starting");
+    sim_state::set_ready_to_fly(false);
 
     bridge = std::make_unique<Bridge>();
     udp_server = std::make_unique<UdpServer>();
@@ -254,6 +256,7 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void *inPa
             // User aircraft loaded — reload aircraft-specific configuration
             XPLANE_LOG_INFO("User aircraft loaded - reloading aircraft configuration (payload stations, etc.)");
             aircraft_config::reload();
+            sim_state::set_ready_to_fly(true);
         }
     }
 }
