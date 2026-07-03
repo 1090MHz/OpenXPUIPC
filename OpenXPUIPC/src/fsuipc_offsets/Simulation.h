@@ -1592,39 +1592,36 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //            XPLMSetDatai(r, static_cast<int>(take<int32_t>(src)));
 //        },
 //        "AI traffic control parameter"},
-//
-//       // Hot buttons: # of slots — No. of FSUIPC Hot joystick button slots
-//       // following
-//       {0x290C, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x290C");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Hot buttons: # of slots"},
-//
-//       // Hot Button Joystick + 128 — Joystick number 0-15 plus 128. 0 if slot
-//       // free
-//       {0x2910, 1,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x2910");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x2910");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
-//        },
-//        "Hot Button Joystick + 128"},
+
+       // Hot buttons: # of slots — No. of FSUIPC Hot joystick button slots
+       // following
+       {0x290C, 4,
+        // Read/Write: Read (only)
+        [](uint8_t *dst, DataRefCache &)
+        {
+           // FSUIPC Hot Button slots are not implemented by OpenXPUIPC.
+           // Report zero available slots.
+          put<uint32_t>(dst, 0);
+        },
+        nullptr,
+        "Hot buttons: # of slots"},
+
+       // Hot Button Joystick + 128 — Joystick number 0-15 plus 128. 0 if slot
+       // free
+       {0x2910, 1,
+        // Read/Write: Read/Write
+        [](uint8_t *dst, DataRefCache &)
+        {
+           // FSUIPC Hot Button slot table is not implemented by OpenXPUIPC.
+           // Report slot free.
+          put<uint8_t>(dst, 0);
+        },
+        [](const uint8_t *, uint32_t, DataRefCache &)
+        {
+           // FSUIPC Hot Button slot table is not implemented by OpenXPUIPC.
+           // Ignore writes.
+        },
+        "Hot Button Joystick + 128"},
 //
 //       // Hot Button number 0-39 — Buttons 0-31 are normal, 32-39 are the hat
 //       // positons or "points of view".
@@ -1987,18 +1984,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //            XPLMSetDatai(r, static_cast<int>(take<uint32_t>(src)));
 //        },
 //        "Key press to FS"},
-//
-//       // Hot keys: # of slots — Number of FSUIPC hot key slots following
-//       {0x320C, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x320C");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Hot keys: # of slots"},
+
+       // Hot keys: # of slots — Number of FSUIPC hot key slots following
+       {0x320C, 4,
+        // Read/Write: Read (only)
+        [](uint8_t *dst, DataRefCache &)
+        {
+           // FSUIPC Hot Key slots are not implemented by OpenXPUIPC.
+           // Report zero available slots.
+          put<uint32_t>(dst, 0);
+        },
+        nullptr,
+        "Hot keys: # of slots"},
 //
 //       // Hot Key keycode — Virtual keycode for hotkey
 //       {0x3210, 1,
