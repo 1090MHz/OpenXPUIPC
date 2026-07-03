@@ -129,26 +129,37 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
            XPLMSetDataf(r_h18, conv::hpa_to_inch(val / 16.0f));
        },
        "QNH / altimeter setting"},
-//
-//       // G1000 altimeter setting (mb) — millibars (hPa) * 16, this is the
-//       // "Kollsman" window setting on the G1000 altimeter
-//       {0x0332, 2,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0332");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0332");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint16_t>(src)));
-//        },
-//        "G1000 altimeter setting (mb)"},
+
+       // G1000 altimeter setting (mb) — millibars (hPa) * 16, this is the
+       // "Kollsman" window setting on the G1000 altimeter
+       {0x0332, 2,
+        // Read/Write: Read/Write
+        [](uint8_t *dst, DataRefCache &dref)
+        {
+          (void)dref;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/actuators/barometer_setting_in_hg_pilot");
+          if (r) {
+            float inHg = XPLMGetDataf(r);
+            // Convert inHg to millibars * 16: 1 inHg = 33.8639 mb
+            uint16_t mb16 = static_cast<uint16_t>(inHg * 33.8639f * 16.0f);
+            put<uint16_t>(dst, mb16);
+          } else {
+            put<uint16_t>(dst, 0);
+          }
+        },
+        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
+        {
+          (void)dref;
+          (void)sz;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/actuators/barometer_setting_in_hg_pilot");
+          if (r) {
+            uint16_t mb16 = take<uint16_t>(src);
+            // Convert millibars * 16 to inHg
+            float inHg = static_cast<float>(mb16) / 16.0f / 33.8639f;
+            XPLMSetDataf(r, inHg);
+          }
+        },
+        "G1000 altimeter setting (mb)"},
 
       // Turn coordinator ball — -128 to +127, turn coordinator ball
       // position, +to right, - to left, 0 balanced
@@ -177,32 +188,36 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
        },
        nullptr,
        "Turn rate (0=level, +-512=2min turn)"},
-//
-//       // Turn coordinator ball position — More precise version of 036E, range
-//       // -1.0 to +1.0
-//       {0x0380, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0380");
-//          put<float>(dst, static_cast<float>(r ? XPLMGetDataf(r) : 0.0f));
-//        },
-//        nullptr,
-//        "Turn coordinator ball position"},
-//
-//       // Turn rate — More precise version of 037C, the range -3.0 to +3.0 is
-//       // equivalent to the 2 mins left/right range.
-//       {0x0384, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0384");
-//          put<float>(dst, static_cast<float>(r ? XPLMGetDataf(r) : 0.0f));
-//        },
-//        nullptr,
-//        "Turn rate"},
+
+       // Turn coordinator ball position — More precise version of 036E, range
+       // -1.0 to +1.0
+       {0x0380, 4,
+        // Read/Write: Read (only)
+        [](uint8_t *dst, DataRefCache &dref)
+        {
+          (void)dref;
+          static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/misc/slip");
+          float slip = r ? XPLMGetDataf(r) : 0.0f;
+          // Normalize to -1.0 to +1.0 range (same scaling as 036E but as float)
+          put<float>(dst, slip / 10.0f);
+        },
+        nullptr,
+        "Turn coordinator ball position (precise)"},
+
+       // Turn rate — More precise version of 037C, the range -3.0 to +3.0 is
+       // equivalent to the 2 mins left/right range.
+       {0x0384, 4,
+        // Read/Write: Read (only)
+        [](uint8_t *dst, DataRefCache &dref)
+        {
+          (void)dref;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/turn_rate_heading_deg_pilot");
+          float rate = r ? XPLMGetDataf(r) : 0.0f;
+          // Return as float directly (same source as 037C)
+          put<float>(dst, rate);
+        },
+        nullptr,
+        "Turn rate (precise)"},
 //
 //       // Display IAS (<= FS2000)
 //       {0x0612, 2,
@@ -242,25 +257,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
 //            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
 //        },
 //        "Active Engine bit-pattern"},
-//
-//       // ENG1 Ant-Ice / Carb heat — 0=Off, 1=On
-//       {0x08B2, 2,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x08B2");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x08B2");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<int16_t>(src)));
-//        },
-//        "ENG1 Ant-Ice / Carb heat"},
+
+       // ENG1 Ant-Ice / Carb heat — 0=Off, 1=On
+       {0x08B2, 2,
+        // Read/Write: Read/Write
+        [](uint8_t *dst, DataRefCache &dref)
+        {
+          (void)dref;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/ice/ice_inlet_heat_on_per_engine");
+          int _iv = 0;
+          if (r)
+            XPLMGetDatavi(r, &_iv, 0, 1);
+          put<int16_t>(dst, static_cast<int16_t>(_iv));
+        },
+        nullptr,
+        "Engine 1 anti-ice / carb heat"},
 
       // ENG2 Ant-Ice / Carb heat — 0=Off, 1=On
       {0x094A, 2,
@@ -319,25 +330,37 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
        },
        nullptr,
        "Gyro vacuum (inHg, double)"},
-//
-//       // Spoiler arm — 0=Off, 1=Active (Arm spoiler for auto-deployment)
-//       {0x0BCC, 4,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0BCC");
-//          put<int32_t>(dst, static_cast<int32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0BCC");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<int32_t>(src)));
-//        },
-//        "Spoiler arm"},
+
+       // Spoiler arm — 0=Off, 1=Active (Arm spoiler for auto-deployment)
+       {0x0BCC, 4,
+        // Read/Write: Read/Write
+        [](uint8_t *dst, DataRefCache &dref)
+        {
+          (void)dref;
+          static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/controls/sbrkrqst");
+          if (r) {
+            float val = XPLMGetDataf(r);
+            // sbrkrqst: -0.5 = armed, 0 = off, 1 = max deployment
+            // FSUIPC: 0 = off, 1 = armed
+            int32_t armed = (val == -0.5f) ? 1 : 0;
+            put<int32_t>(dst, armed);
+          } else {
+            put<int32_t>(dst, 0);
+          }
+        },
+        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
+        {
+          (void)dref;
+          (void)sz;
+          static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/controls/sbrkrqst");
+          if (r) {
+            int32_t val = take<int32_t>(src);
+            // FSUIPC: 0 = off, 1 = armed
+            // sbrkrqst: -0.5 = armed, 0 = off
+            XPLMSetDataf(r, (val == 1) ? -0.5f : 0.0f);
+          }
+        },
+        "Spoiler arm"},
 //
 //       // Gyro Drift
 //       {0x0C3E, 2,
@@ -803,25 +826,25 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
 //        nullptr,
 //        nullptr,
 //        "Hyd. 4 Reservoir Pct."},
-//
-//       // Avionics Master Switch
-//       {0x2E80, 4,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x2E80");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x2E80");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint32_t>(src)));
-//        },
-//        "Avionics Master Switch"},
+
+       // Avionics Master Switch
+       {0x2E80, 4,
+        // Read/Write: Read/Write
+        [](uint8_t *dst, DataRefCache &dref)
+        {
+          (void)dref;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit/electrical/avionics_on");
+          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
+        },
+        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
+        {
+          (void)dref;
+          (void)sz;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit/electrical/avionics_on");
+          if (r)
+            XPLMSetDatai(r, static_cast<int>(take<uint32_t>(src)));
+        },
+        "Avionics Master Switch"},
 //
 //       // Panel Autofeather Switch
 //       {0x2E88, 4,
@@ -956,44 +979,44 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
 //            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
 //        },
 //        "electric always available (FS2002 only)"},
-//
-//       // No smoking switch — 0 off, 1 on
-//       {0x341C, 1,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x341C");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x341C");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
-//        },
-//        "No smoking switch"},
-//
-//       // Seat belt switch — 0 off, 1 on
-//       {0x341D, 1,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x341D");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x341D");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
-//        },
-//        "Seat belt switch"},
+
+       // No smoking switch — 0 off, 1 on
+       {0x341C, 1,
+        // Read/Write: Read/Write
+        [](uint8_t *dst, DataRefCache &dref)
+        {
+          (void)dref;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/switches/no_smoking");
+          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
+        },
+        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
+        {
+          (void)dref;
+          (void)sz;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/switches/no_smoking");
+          if (r)
+            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
+        },
+        "No smoking switch"},
+
+       // Seat belt switch — 0 off, 1 on
+       {0x341D, 1,
+        // Read/Write: Read/Write
+        [](uint8_t *dst, DataRefCache &dref)
+        {
+          (void)dref;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/switches/fasten_seat_belts");
+          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
+        },
+        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
+        {
+          (void)dref;
+          (void)sz;
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/switches/fasten_seat_belts");
+          if (r)
+            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
+        },
+        "Seat belt switch"},
 //
 //       // Rad Ind Switch
 //       {0x3420, 2,
