@@ -552,18 +552,20 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        nullptr,
 //        "Name of last saved flight"},
 //
-//       // Elapsed time — Counts simiulated time, seconds. Accurate to
-//       // fractions but only updated on a frame basis
-//       {0x04A8, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x04A8");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "Elapsed time"},
+      // Elapsed time — Sim elapsed time in seconds (fractional)
+      {0x04A8, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+         // Total time since the flight got reset by something
+         static XPLMDataRef r_flight = XPLMFindDataRef("sim/time/total_flight_time_sec");
+         double t = 0.0;
+         if (r_flight)
+           t = static_cast<double>(XPLMGetDataf(r_flight));
+         put<double>(dst, t);
+       },
+       nullptr,
+       "Elapsed time"},
 //
 //       // Smoke system available (<= FS2000) — 0=No smoke available, 1=Smoke
 //       // system fitted
