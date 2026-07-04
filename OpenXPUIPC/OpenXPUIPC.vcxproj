@@ -166,6 +166,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\plugin.cpp" />
+    <ClCompile Include="src\ui\toast_notification.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XPlaneUtilities\XPlaneUtilities.vcxproj">
