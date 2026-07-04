@@ -19,6 +19,9 @@
 #include "cfg_offset_table.h"
 #include "impl/sim_state.h"
 
+// Forward declaration for FSUIPC text display message buffer
+namespace xpuipc { extern char tts_message_buffer[128]; }
+
 class Bridge {
 public:
     Bridge() {
@@ -89,6 +92,18 @@ public:
         if (offset + size > sizeof(buf_)) return;
         // Always store in buffer immediately (so readback works)
         std::memcpy(buf_ + offset, src, size);
+
+        // Special handling for offset 0x3380 (FSUIPC text display message buffer):
+        // Update the shared message buffer immediately to avoid race conditions
+        // when 0x32FA (trigger) is written before 0x3380 (message) due to
+        // separate IPC messages arriving in quick succession.
+        constexpr uint32_t TEXT_MSG_OFFSET = 0x3380;
+        constexpr uint32_t TEXT_MSG_SIZE = 128;
+        if (offset == TEXT_MSG_OFFSET) {
+            size_t copy_len = (size < TEXT_MSG_SIZE) ? size : TEXT_MSG_SIZE - 1;
+            std::memcpy(xpuipc::tts_message_buffer, src, copy_len);
+            xpuipc::tts_message_buffer[copy_len] = '\0';  // Ensure null termination
+        }
 
         const OffsetEntry* entry = find(offset);
         if (entry && entry->write) {
