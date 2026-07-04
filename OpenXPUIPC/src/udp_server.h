@@ -173,6 +173,12 @@ private:
                 auto* hdr = reinterpret_cast<ReadHeader*>(p);
                 p += sizeof(ReadHeader);
                 if (p + hdr->size > end) return;
+                
+#ifndef NDEBUG
+                XPLANE_LOG_DEBUG("UDP READ  offset=0x{:04X} size={} [{}]",
+                                 hdr->offset, hdr->size, bridge_->desc(hdr->offset));
+#endif
+                
                 bridge_->read(p, hdr->offset, hdr->size);
                 p += hdr->size;
                 break;
@@ -183,6 +189,25 @@ private:
                 auto* hdr = reinterpret_cast<WriteHeader*>(p);
                 p += sizeof(WriteHeader);
                 if (p + hdr->size > end) return;
+                
+#ifndef NDEBUG
+                // Log write operations (debug builds only)
+                uint32_t sample_u32 = 0;
+                uint16_t sample_u16 = 0;
+                uint8_t sample_u8 = 0;
+                if (hdr->size >= 4)
+                    std::memcpy(&sample_u32, p, sizeof(sample_u32));
+                else if (hdr->size >= 2)
+                    std::memcpy(&sample_u16, p, sizeof(sample_u16));
+                else if (hdr->size >= 1)
+                    std::memcpy(&sample_u8, p, sizeof(sample_u8));
+
+                XPLANE_LOG_DEBUG("UDP WRITE offset=0x{:04X} size={} val=0x{:08X} [{}]",
+                                 hdr->offset, hdr->size, 
+                                 hdr->size >= 4 ? sample_u32 : hdr->size >= 2 ? sample_u16 : sample_u8,
+                                 bridge_->desc(hdr->offset));
+#endif
+                
                 bridge_->write(p, hdr->offset, hdr->size);
                 p += hdr->size;
                 break;
