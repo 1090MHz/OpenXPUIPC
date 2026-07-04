@@ -22,6 +22,7 @@
 #endif
 #include "impl/aircraft_config.h"
 #include "impl/sim_state.h"
+#include "ui/toast_notification.h"
 
 #include <XPLMPlugin.h>
 #include <XPLMUtilities.h>
@@ -186,6 +187,9 @@ PLUGIN_API int XPluginEnable()
     bool ipc_ok = false;
     bool udp_ok = false;
 
+    // Initialize toast notification system
+    ToastNotification::initialize();
+
     // Bridge update loop — refreshes DataRefs into shadow buffer.
     // Must run BEFORE IPC server so the buffer is populated on first request.
     XPLMCreateFlightLoop_t fl{};
@@ -217,6 +221,7 @@ PLUGIN_API int XPluginEnable()
 
 PLUGIN_API void XPluginDisable()
 {
+    ToastNotification::shutdown();
 #ifdef _WIN32
     ipc_server->stop();
 #endif
