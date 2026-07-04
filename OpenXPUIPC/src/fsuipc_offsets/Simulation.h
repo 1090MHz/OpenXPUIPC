@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // fsuipc_offsets/Simulation.h — Production offset table
 //
-// 197 total offsets in this category
+// 199 total offsets in this category
 // (TODO entries are commented out with implementation instructions)
 //
 // TO IMPLEMENT A NEW OFFSET:
@@ -14,6 +14,17 @@
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
 #include "impl/sim_state.h"
+#include "ui/toast_notification.h"
+#include <XPLMUtilities.h>
+#include <algorithm>
+#include <cstring>
+
+namespace xpuipc {
+    // Text-to-speech message buffer for FSUIPC offsets 0x3380 (message) and 0x32FA (trigger)
+    // This buffer is updated immediately in Bridge::write() when offset 0x3380 is written,
+    // ensuring the message is available when 0x32FA triggers regardless of write order.
+    inline char tts_message_buffer[128] = {};
+}
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 {
@@ -2121,27 +2132,43 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        },
 //        "Assorted facility inhibits"},
 //
-//       // Text display control — Writes to here makes FSUIPC display the last
-//       // string written to 3380. The value written here is the Delay time, in
-//       // seconds, till the message is cleared (0=leave till replaced), or -1
-//       // for scrolling (if that option is set in FS).
-//       {0x32FA, 2,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x32FA");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x32FA");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<int16_t>(src)));
-//        },
-//        "Text display control"},
+      // Text display control — Writes to here makes FSUIPC display the last
+      // string written to 3380. The value written here is the Delay time, in
+      // seconds, till the message is cleared (0=leave till replaced), or -1
+      // for scrolling (if that option is set in FS).
+      {0x32FA, 2,
+       // Read/Write: Write (only)
+       nullptr,
+       [](const uint8_t *src, uint32_t, DataRefCache &)
+       {
+         // Read the delay time from the client (2-byte signed value)
+         int16_t delay_seconds = take<int16_t>(src);
+         
+         // Trigger TTS and toast notification with the current message buffer
+         if (xpuipc::tts_message_buffer[0] != '\0') {
+           // Speak the message immediately
+           XPLMSpeakString(xpuipc::tts_message_buffer);
+           
+           // Determine display duration based on FSUIPC delay value
+           float duration;
+           if (delay_seconds == 0) {
+             // 0 = leave till replaced (stays on screen until clicked or replaced)
+             duration = 0.0f;
+           } else if (delay_seconds == -1) {
+             // -1 = scrolling mode (use 30 seconds as reasonable reading time)
+             duration = 30.0f;
+           } else if (delay_seconds > 0) {
+             // Positive value = duration in seconds (exact client-specified time)
+             duration = static_cast<float>(delay_seconds);
+           } else {
+             // Other negative values default to 10 seconds
+             duration = 10.0f;
+           }
+           
+           ToastNotification::show(xpuipc::tts_message_buffer, duration, ToastNotification::Type::Info);
+         }
+       },
+       "Text display control (trigger)"},
 //
 //       // AIR file change counter — Incremented by 1 when AIR file pathname at
 //       // 3C00 changes
@@ -2526,27 +2553,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
        },
        nullptr,
        "FSUIPC activity counter"},
-//
-//       // Text display in FS — 128 byte area, containing messages intercepted
-//       // by AdvDisplay (if running). Also, can write messages for display
-//       // here, then set delay/scroll option in 32FA.
-//       {0x3380, 1,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3380");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3380");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
-//        },
-//        "Text display in FS"},
+
+      // Text display in FS — 128 byte area, containing messages intercepted
+      // by AdvDisplay (if running). Also, can write messages for display
+      // here, then set delay/scroll option in 32FA.
+      {0x3380, 128,
+       // Read/Write: Read/Write
+       [](uint8_t *dst, DataRefCache &)
+       {
+         std::memcpy(dst, xpuipc::tts_message_buffer, 128);
+       },
+       nullptr,  // Write handler removed - message buffer updated immediately in Bridge::write()
+       "Text display message buffer"},
 //
 //       // FSUIPC logging control / indicators — Bits for each logging option -
 //       // 0 = logging enabled (ignored, as logging is always enabled nowadays)
