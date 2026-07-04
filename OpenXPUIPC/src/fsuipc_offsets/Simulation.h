@@ -2433,12 +2433,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 
       // Menu/dialog unavailable flag — FSUIPC semantics: non-zero means sim
       // unavailable due to menus/dialogs.
+      //
+      // In X-Plane 12, the regular menu bar (File, Flight, View, Developer,
+      // Plugins) runs in parallel and does NOT stop the flight loop. However,
+      // opening the "Flight Configuration" or "Settings" window causes X-Plane
+      // to suspend the flight loop for the duration they are open. This is
+      // determined by checking how long ago Bridge::update() last ran
+      // (real-world time).
+      //
+      // When this lambda executes the flight loop is running → always write 0.
+      // Bridge::read() overrides to 1 when the loop has been stalled >150 ms.
       {0x3365, 1,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &)
        {
-        // Detects menu/pause by tracking if sim/time/total_flight_time_sec advances. 
-        put<uint8_t>(dst, sim_state::fsuipc_menu_dialog_flag());
+         put<uint8_t>(dst, 0);  // Flight loop running → sim not suspended
        },
        nullptr,
        "Menu/dialog unavailable flag"},
@@ -2505,19 +2514,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        nullptr,
 //        "Last log message time"},
 //
-//       // FSUIPC activity counter — Keeps changing whilst FSUIPC (and
-//       // therefore FS) is running. Can be used by wideFS clients to detect FS
-//       // crashes
-//       {0x337E, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x337E");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "FSUIPC activity counter"},
+      // FSUIPC activity counter — Keeps changing whilst FSUIPC (and
+      // therefore FS) is running. Can be used by wideFS clients to detect FS
+      // crashes
+      {0x337E, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+        (void)dref;
+         put<uint16_t>(dst, sim_state::get_activity_counter());
+       },
+       nullptr,
+       "FSUIPC activity counter"},
 //
 //       // Text display in FS — 128 byte area, containing messages intercepted
 //       // by AdvDisplay (if running). Also, can write messages for display

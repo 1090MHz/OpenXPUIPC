@@ -40,6 +40,9 @@ public:
     // Refreshes the shadow buffer from live DataRefs and processes
     // any pending write-handler calls.
     void update() {
+        // Refresh the flight-loop watchdog timestamp for suspended-simulation detection.
+        sim_state::update_flight_loop_watchdog_timestamp();
+
         // 1. Process pending writes (apply to DataRefs)
         for (auto& pw : pending_writes_) {
             if (pw.entry && pw.entry->write)
@@ -52,12 +55,8 @@ public:
         for (const auto& [off, entry] : read_list_)
             entry->read(buf_ + off, dr_);
 
-        // 3. Update flight-time tracking for menu/pause detection
-        static XPLMDataRef r_flight_time = XPLMFindDataRef("sim/time/total_flight_time_sec");
-        if (r_flight_time) {
-            float current_time = XPLMGetDataf(r_flight_time);
-            sim_state::update_flight_time(current_time);
-        }
+        // 3. Increment activity counter (heartbeat for crash detection)
+        sim_state::increment_activity_counter();
     }
 
     // Read `size` bytes starting at `offset` into `dst`.
@@ -68,6 +67,20 @@ public:
             return;
         }
         std::memcpy(dst, buf_ + offset, size);
+
+        // If the flight loop has stalled, X-Plane has opened the Flight
+        // Configuration or Settings window and suspended simulation.
+        // (The regular menu bar — File, Flight, View, Developer, Plugins —
+        // runs in parallel and does not stop the loop.)
+        // Override offset 0x3365 to 1 (sim suspended) regardless of the
+        // stale shadow buffer value. Bridge::read() is called from the IPC
+        // message pump, which keeps running even when the flight loop stops.
+        if (!sim_state::is_flight_loop_watchdog_fresh()) {
+            constexpr uint32_t MENU_FLAG_OFFSET = 0x3365;
+            if (offset <= MENU_FLAG_OFFSET && MENU_FLAG_OFFSET < offset + size) {
+                dst[MENU_FLAG_OFFSET - offset] = 1;
+            }
+        }
     }
 
     // Write `size` bytes from `src` into the shadow buffer.
