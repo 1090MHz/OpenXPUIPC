@@ -1,7 +1,7 @@
 // OpenXPUIPC - Toast Notification Helper
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Provides simple toast-style notifications that auto-dismiss after a timeout.
+// Provides simple toast-style notifications with optional auto-dismiss.
 // Uses the X-Plane SDK's native "Growl Notifications" window layer for
 // non-intrusive, always-on-top messages.
 
@@ -32,7 +32,7 @@ public:
 
     /// @brief Display a toast notification
     /// @param message Text to display
-    /// @param duration_seconds How long to show the notification (default: 3 seconds)
+    /// @param duration_seconds How long to show the notification (0 = until clicked/replaced, default: 3 seconds)
     /// @param type Notification type affecting color (default: Info)
     static void show(const std::string& message, 
                      float duration_seconds = 3.0f,

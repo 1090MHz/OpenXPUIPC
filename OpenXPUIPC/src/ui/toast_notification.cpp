@@ -310,12 +310,16 @@ float ToastNotification::flight_loop_callback(float elapsed_since_last_call, flo
     // Check if notification has timed out
     if (s_state.is_active)
     {
-        auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - s_state.show_time).count() / 1000.0f;
-        
-        if (elapsed >= s_state.duration)
+        // Duration of 0 means "leave till replaced" - no auto-dismiss
+        if (s_state.duration > 0.0f)
         {
-            dismiss();
+            auto now = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - s_state.show_time).count() / 1000.0f;
+            
+            if (elapsed >= s_state.duration)
+            {
+                dismiss();
+            }
         }
     }
     
