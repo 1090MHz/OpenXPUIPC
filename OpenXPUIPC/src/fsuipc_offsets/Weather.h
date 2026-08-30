@@ -66,7 +66,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/rain_percent");
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/region/rain_percent");
          float pct = r ? XPLMGetDataf(r) : 0.0f;
          put<uint8_t>(dst, static_cast<uint8_t>(pct * 5.0f + 0.5f));
        },
@@ -491,9 +491,9 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/barometer_sealevel_inhg");
-         // inhg * 33.8639 mb/inhg * 16 = raw; standard 29.92 inhg -> 16207
-         put<uint16_t>(dst, static_cast<uint16_t>((r ? XPLMGetDataf(r) : 29.92f) * 33.8639f * 16.0f));
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/region/qnh_pas");
+         // pascals * 0.01 mb/Pa * 16 = raw; standard 101325 Pa -> 16212
+         put<uint16_t>(dst, static_cast<uint16_t>((r ? XPLMGetDataf(r) : 101325.0f) * 0.16f));
        },
        nullptr,
        "Pressure QNH (mb*16)"},
@@ -1326,8 +1326,8 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/barometer_sealevel_inhg");
-         put<uint16_t>(dst, static_cast<uint16_t>((r ? XPLMGetDataf(r) : 29.92f) * 33.8639f * 16.0f));
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/region/qnh_pas");
+         put<uint16_t>(dst, static_cast<uint16_t>((r ? XPLMGetDataf(r) : 101325.0f) * 0.16f));
        },
        nullptr,
        "Pressure QNH (mb*16, at 0x0F48)"},
@@ -2280,9 +2280,9 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/barometer_sealevel_inhg");
-         double inhg = r ? static_cast<double>(XPLMGetDataf(r)) : 29.92;
-         put<double>(dst, inhg * 33.8639);
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/region/qnh_pas");
+         double pas = r ? static_cast<double>(XPLMGetDataf(r)) : 101325.0;
+         put<double>(dst, pas * 0.01);
        },
        nullptr,
        "Sea level pressure QNH (hPa, double)"},

@@ -1,9 +1,10 @@
-// Auto-generated from XPUIPCOffsets.cfg — DO NOT EDIT MANUALLY
-// Re-generate with:  python generate_offsets.py <config> <output>
-// 110 offset entries generated, 0 skipped
+// Auto-generated from custom_offsets/XPUIPCOffsets.cfg — DO NOT EDIT MANUALLY
+//
+// CONTRIBUTING: To add custom offsets, you have two options:
+//   1. Add to category files (Engines.h, Weather.h, etc.) — recommended for contributors
+//   2. Submit PR with updated XPUIPCOffsets.cfg — maintainer will regenerate this file
 #pragma once
 
-//#include "offset_table.h"   // OffsetEntry, put<>, take<>, DataRefCache
 #include <cmath>             // std::pow, std::fmod, std::abs, std::round
 
 inline const std::vector<OffsetEntry>& cfg_offset_table() {
@@ -240,19 +241,6 @@ inline const std::vector<OffsetEntry>& cfg_offset_table() {
       nullptr,
       "PropSpeed1" },
 
-    // 0x08E8 FLOAT64 r  RPN: $CHT1 1.8 * 32 +
-    { 0x08E8, 8,
-      [](uint8_t* dst, DataRefCache&) {
-          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/CHT_deg_cel");
-          float _ft_v0 = 0.0f; if (r_v0) XPLMGetDatavf(r_v0, &_ft_v0, 0, 1);
-          double v0 = static_cast<double>(_ft_v0);
-          double v1 = (v0 * 1.8);
-          double v2 = (v1 + 32.0);
-          put<double>(dst, static_cast<double>(v2));
-      },
-      nullptr,
-      "CHT1" },
-
     // 0x0926 SINT16 rw  RPN: $Prop2 $PropMaxRPM / 20480 * 4096 - >Prop2 @ 4096 + 20480 / $PropMaxRPM *
     { 0x0926, 2,
       [](uint8_t* dst, DataRefCache&) {
@@ -309,19 +297,6 @@ inline const std::vector<OffsetEntry>& cfg_offset_table() {
       },
       nullptr,
       "PropSpeed2" },
-
-    // 0x0980 FLOAT64 r  RPN: $CHT2 1.8 * 32 +
-    { 0x0980, 8,
-      [](uint8_t* dst, DataRefCache&) {
-          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/CHT_deg_cel");
-          float _ft_v0 = 0.0f; if (r_v0) XPLMGetDatavf(r_v0, &_ft_v0, 1, 1);
-          double v0 = static_cast<double>(_ft_v0);
-          double v1 = (v0 * 1.8);
-          double v2 = (v1 + 32.0);
-          put<double>(dst, static_cast<double>(v2));
-      },
-      nullptr,
-      "CHT2" },
 
     // 0x09BE SINT16 rw  RPN: $Prop3 $PropMaxRPM / 20480 * 4096 - >Prop3 @ 4096 + 20480 / $PropMaxRPM *
     { 0x09BE, 2,
@@ -380,19 +355,6 @@ inline const std::vector<OffsetEntry>& cfg_offset_table() {
       nullptr,
       "PropSpeed3" },
 
-    // 0x0A18 FLOAT64 r  RPN: $CHT3 1.8 * 32 +
-    { 0x0A18, 8,
-      [](uint8_t* dst, DataRefCache&) {
-          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/CHT_deg_cel");
-          float _ft_v0 = 0.0f; if (r_v0) XPLMGetDatavf(r_v0, &_ft_v0, 2, 1);
-          double v0 = static_cast<double>(_ft_v0);
-          double v1 = (v0 * 1.8);
-          double v2 = (v1 + 32.0);
-          put<double>(dst, static_cast<double>(v2));
-      },
-      nullptr,
-      "CHT3" },
-
     // 0x0A56 SINT16 rw  RPN: $Prop4 $PropMaxRPM / 20480 * 4096 - >Prop4 @ 4096 + 20480 / $PropMaxRPM *
     { 0x0A56, 2,
       [](uint8_t* dst, DataRefCache&) {
@@ -449,19 +411,6 @@ inline const std::vector<OffsetEntry>& cfg_offset_table() {
       },
       nullptr,
       "PropSpeed4" },
-
-    // 0x0AB0 FLOAT64 r  RPN: $CHT4 1.8 * 32 +
-    { 0x0AB0, 8,
-      [](uint8_t* dst, DataRefCache&) {
-          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/CHT_deg_cel");
-          float _ft_v0 = 0.0f; if (r_v0) XPLMGetDatavf(r_v0, &_ft_v0, 3, 1);
-          double v0 = static_cast<double>(_ft_v0);
-          double v1 = (v0 * 1.8);
-          double v2 = (v1 + 32.0);
-          put<double>(dst, static_cast<double>(v2));
-      },
-      nullptr,
-      "CHT4" },
 
     // 0x0B6D UINT8 rw  RPN: $rel_ss_dgy >rel_ss_dgy @
     { 0x0B6D, 1,
@@ -1162,7 +1111,7 @@ inline const std::vector<OffsetEntry>& cfg_offset_table() {
     // 0x3930 FLOAT64 r  RPN: $EGT4 1.8 * 491.67 +
     { 0x3930, 8,
       [](uint8_t* dst, DataRefCache&) {
-          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_C");
+          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_cel");
           float _ft_v0 = 0.0f; if (r_v0) XPLMGetDatavf(r_v0, &_ft_v0, 3, 1);
           double v0 = static_cast<double>(_ft_v0);
           double v1 = (v0 * 1.8);
@@ -1205,7 +1154,7 @@ inline const std::vector<OffsetEntry>& cfg_offset_table() {
     // 0x39F0 FLOAT64 r  RPN: $EGT3 1.8 * 491.67 +
     { 0x39F0, 8,
       [](uint8_t* dst, DataRefCache&) {
-          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_C");
+          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_cel");
           float _ft_v0 = 0.0f; if (r_v0) XPLMGetDatavf(r_v0, &_ft_v0, 2, 1);
           double v0 = static_cast<double>(_ft_v0);
           double v1 = (v0 * 1.8);
@@ -1248,7 +1197,7 @@ inline const std::vector<OffsetEntry>& cfg_offset_table() {
     // 0x3AB0 FLOAT64 r  RPN: $EGT2 1.8 * 491.67 +
     { 0x3AB0, 8,
       [](uint8_t* dst, DataRefCache&) {
-          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_C");
+          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_cel");
           float _ft_v0 = 0.0f; if (r_v0) XPLMGetDatavf(r_v0, &_ft_v0, 1, 1);
           double v0 = static_cast<double>(_ft_v0);
           double v1 = (v0 * 1.8);
@@ -1291,7 +1240,7 @@ inline const std::vector<OffsetEntry>& cfg_offset_table() {
     // 0x3B70 FLOAT64 r  RPN: $EGT1 1.8 * 491.67 +
     { 0x3B70, 8,
       [](uint8_t* dst, DataRefCache&) {
-          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_C");
+          static XPLMDataRef r_v0 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_cel");
           float _ft_v0 = 0.0f; if (r_v0) XPLMGetDatavf(r_v0, &_ft_v0, 0, 1);
           double v0 = static_cast<double>(_ft_v0);
           double v1 = (v0 * 1.8);
