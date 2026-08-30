@@ -66,7 +66,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/rain_percent");
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/region/rain_percent");
          float pct = r ? XPLMGetDataf(r) : 0.0f;
          put<uint8_t>(dst, static_cast<uint8_t>(pct * 5.0f + 0.5f));
        },
