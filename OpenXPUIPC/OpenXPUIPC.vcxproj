@@ -95,6 +95,7 @@
       <AdditionalIncludeDirectories>src;include;..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,6 +116,7 @@
       <AdditionalIncludeDirectories>src;include;..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -133,6 +135,7 @@
       <AdditionalIncludeDirectories>src;include;..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,6 +156,7 @@
       <AdditionalIncludeDirectories>src;include;..\fmt\include;..\spdlog\include;..\third_party\libs\XPSDK430\CHeaders\XPLM;..\XPlaneUtilities\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
