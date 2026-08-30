@@ -361,7 +361,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_unknown()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/misc/cgz_ref_to_default");
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel2/misc/cg_offset_z");
          put<double>(dst, static_cast<double>(r ? XPLMGetDataf(r) : 0.0f));
        },
        nullptr,
