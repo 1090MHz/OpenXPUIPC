@@ -57,17 +57,19 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_unknown()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit/pressure/cabin_vvi_set_m_msec");
-         put<float>(dst, r ? XPLMGetDataf(r) : 0.0f);
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit/pressure/cabin_vvi_set_m_fpm");
+         // X-Plane dataref is in fpm, FSUIPC expects feet/sec
+         put<float>(dst, r ? XPLMGetDataf(r) / 60.0f : 0.0f);
        },
        [](const uint8_t *src, uint32_t, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit/pressure/cabin_vvi_set_m_msec");
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit/pressure/cabin_vvi_set_m_fpm");
          if (r)
-           XPLMSetDataf(r, take<float>(src));
+           // Convert FSUIPC feet/sec to X-Plane fpm
+           XPLMSetDataf(r, take<float>(src) * 60.0f);
        },
-       "Cabin VVI set (m/sec)"},
+       "Cabin VVI set (feet/sec)"},
 //
 //       // Pressurisation: cabin press diff — lb/sqft (FLOAT32)
 //       {0x0324, 4,
