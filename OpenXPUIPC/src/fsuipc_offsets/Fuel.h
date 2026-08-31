@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // fsuipc_offsets/Fuel.h — Production offset table
 //
-// 38 total offsets in this category
+// 41 total offsets in this category
 // (TODO entries are commented out with implementation instructions)
 //
 // TO IMPLEMENT A NEW OFFSET:
@@ -865,42 +865,53 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
        nullptr,
        "External2 tank fuel capacity"},
 
-//       // Fuel total quantity (FSX) — US Gallons
-//       {0x1264, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1264");
-//          put<int32_t>(dst, static_cast<int32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Fuel total quantity (FSX)"},
-//
-//       // Fuel selected quantity (FSX) — US Gallons
-//       {0x1268, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x1268");
-//          put<int32_t>(dst, static_cast<int32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Fuel selected quantity (FSX)"},
-//
-//       // Fuel total weight (FSX) — Pounds
-//       {0x126C, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x126C");
-//          put<int32_t>(dst, static_cast<int32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Fuel total weight (FSX)"},
-//
+      // Fuel total quantity (FSX) — US Gallons
+      {0x1264, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Total fuel weight in kg across all tanks
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_fuel_total");
+         float fuel_kg = r ? XPLMGetDataf(r) : 0.0f;
+         // Convert kg to US gallons using fuel density
+         put<int32_t>(dst, static_cast<int32_t>(conv::kg_to_gallons(fuel_kg)));
+       },
+       nullptr,
+       "Fuel total quantity (gallons)"},
+
+      // Fuel selected quantity (FSX) — US Gallons
+      // Note: For most aircraft this is the same as total fuel. Complex aircraft
+      // with unusable fuel tanks might have different values.
+      {0x1268, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // In X-Plane, assume all fuel is "selected" (usable by engines)
+         // Some complex aircraft may need special handling here
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_fuel_total");
+         float fuel_kg = r ? XPLMGetDataf(r) : 0.0f;
+         put<int32_t>(dst, static_cast<int32_t>(conv::kg_to_gallons(fuel_kg)));
+       },
+       nullptr,
+       "Fuel selected quantity (gallons)"},
+
+      // Fuel total weight (FSX) — Pounds
+      {0x126C, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Total fuel weight in kg across all tanks
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/weight/m_fuel_total");
+         float fuel_kg = r ? XPLMGetDataf(r) : 0.0f;
+         // Convert kg to pounds
+         put<int32_t>(dst, static_cast<int32_t>(fuel_kg * 2.20462f));
+       },
+       nullptr,
+       "Fuel total weight (lbs)"},
+
 //       // Fuel flow at cruise, est (FSX) — Pounds / hour
 //       {0x1270, 4,
 //        // Read/Write: Read (only)
