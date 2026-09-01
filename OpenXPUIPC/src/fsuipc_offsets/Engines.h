@@ -1308,18 +1308,22 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        },
 //        nullptr,
 //        "ENG3 Fuel elapsed time"},
-//
-//       // ENG3 Fuel Flow PPH
-//       {0x0A48, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0A48");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "ENG3 Fuel Flow PPH"},
+
+      // ENG3 Fuel Flow PPH
+      {0x0A48, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h91 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv91 = 0.0f;
+         if (r_h91)
+           XPLMGetDatavf(r_h91, &_fv91, 2, 1);
+         double ff = _fv91 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Engine 3 fuel flow (lbs/hr)"},
 //
 //       // ENG4 Throttle lever — -16384 (or max reverse, usually nearer -4096)
 //       // to +16384
