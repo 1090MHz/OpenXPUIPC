@@ -1757,14 +1757,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 1 N2 %"},
-//
-//       // Turb. ENG1 Corrected Fuel Flow — Pounds per hour, jets and turbos
-//       // only
-//       {0x2020, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Turb. ENG1 Corrected Fuel Flow"},
+
+      // Turb. ENG1 Corrected Fuel Flow — Pounds per hour, jets and turbos
+      // only. X-Plane's fuel flow already accounts for atmospheric conditions.
+      {0x2020, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h119 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv119 = 0.0f;
+         if (r_h119)
+           XPLMGetDatavf(r_h119, &_fv119, 0, 1);
+         double ff = _fv119 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Turb. ENG1 Corrected Fuel Flow"},
 //
 //       // Turb. ENG1 Max Torque fraction
 //       {0x2028, 8,
@@ -1932,13 +1941,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 2 N2 %"},
-//
-//       // Turb. ENG2 Corrected FF — Pounds per hour, jets and turbos only
-//       {0x2120, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Turb. ENG2 Corrected FF"},
+
+      // Turb. ENG2 Corrected FF — Pounds per hour, jets and turbos only.
+      // X-Plane's fuel flow already accounts for atmospheric conditions.
+      {0x2120, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h121 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv121 = 0.0f;
+         if (r_h121)
+           XPLMGetDatavf(r_h121, &_fv121, 1, 1);
+         double ff = _fv121 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Turb. ENG2 Corrected FF"},
 //
 //       // Turb. ENG2 Max Torque fraction
 //       {0x2128, 8,
@@ -2090,13 +2109,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        nullptr,
 //        nullptr,
 //        "Turb. ENG3 Corrected N2 %"},
-//
-//       // Turb. ENG3 Corrected FF — Pounds per hour, jets and turbos only
-//       {0x2220, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Turb. ENG3 Corrected FF"},
+
+      // Turb. ENG3 Corrected FF — Pounds per hour, jets and turbos only.
+      // X-Plane's fuel flow already accounts for atmospheric conditions.
+      {0x2220, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h131 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv131 = 0.0f;
+         if (r_h131)
+           XPLMGetDatavf(r_h131, &_fv131, 2, 1);
+         double ff = _fv131 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Turb. ENG3 Corrected FF"},
 //
 //       // Turb. ENG3 Max Torque fraction
 //       {0x2228, 8,
@@ -2248,13 +2277,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        nullptr,
 //        nullptr,
 //        "Turb. ENG4 Corrected N2 %"},
-//
-//       // Turb. ENG4 Corrected FF — Pounds per hour, jets and turbos only
-//       {0x2320, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Turb. ENG4 Corrected FF"},
+
+      // Turb. ENG4 Corrected FF — Pounds per hour, jets and turbos only.
+      // X-Plane's fuel flow already accounts for atmospheric conditions.
+      {0x2320, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h141 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv141 = 0.0f;
+         if (r_h141)
+           XPLMGetDatavf(r_h141, &_fv141, 3, 1);
+         double ff = _fv141 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Turb. ENG4 Corrected FF"},
 //
 //       // Turb. ENG4 Max Torque fraction
 //       {0x2328, 8,
