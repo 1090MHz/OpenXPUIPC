@@ -1693,18 +1693,22 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        },
 //        nullptr,
 //        "ENG4 Fuel elapsed time"},
-//
-//       // ENG4 Fuel Flow PPH
-//       {0x0AE0, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0AE0");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "ENG4 Fuel Flow PPH"},
+
+      // ENG4 Fuel Flow PPH
+      {0x0AE0, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h115 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv115 = 0.0f;
+         if (r_h115)
+           XPLMGetDatavf(r_h115, &_fv115, 3, 1);
+         double ff = _fv115 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Engine 4 fuel flow (lbs/hr)"},
 
       // Turb. ENG1 N1 %
       {0x2000, 8,
