@@ -727,15 +727,14 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // NOTE: Original bug preserved — reads engine 0 EGT for engine 2
          static XPLMDataRef r_h57 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_cel");
          float _fv57 = 0.0f;
          if (r_h57)
-           XPLMGetDatavf(r_h57, &_fv57, 0, 1);
+           XPLMGetDatavf(r_h57, &_fv57, 1, 1);
          put<int16_t>(dst, static_cast<int16_t>(_fv57 / 860.0f * 16384.0f));
        },
        nullptr,
-       "Engine 2 EGT (bug: reads eng0)"},
+       "Engine 2 EGT"},
 //
 //       // ENG2 Manifold Pressure — "Hg, 1024 = 1"
 //       {0x0958, 2,
@@ -931,16 +930,15 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // NOTE: Original bug preserved — reads engine 0 fuel flow for engine 2
          static XPLMDataRef r_h60 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
          float _fv60 = 0.0f;
          if (r_h60)
-           XPLMGetDatavf(r_h60, &_fv60, 0, 1);
+           XPLMGetDatavf(r_h60, &_fv60, 1, 1);
          double ff = _fv60 * 3600.0 / 0.45359237;
          put<double>(dst, ff);
        },
        nullptr,
-       "Engine 2 fuel flow (bug: reads eng0)"},
+       "Engine 2 fuel flow (lbs/hr)"},
 //
 //       // ENG3 Throttle lever — -16384 (or max reverse, usually nearer -4096)
 //       // to +16384
