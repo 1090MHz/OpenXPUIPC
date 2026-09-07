@@ -41,6 +41,12 @@ namespace aircraft_config
     // Cached fuel tank names
     static std::array<char[TANK_NAME_LENGTH], MAX_TANKS> tank_names{};
     
+    // Cached aircraft metadata for override matching
+    constexpr int AIRCRAFT_NAME_LENGTH = 128;
+    constexpr int AIRCRAFT_STUDIO_LENGTH = 64;
+    static char aircraft_name[AIRCRAFT_NAME_LENGTH] = {};
+    static char aircraft_studio[AIRCRAFT_STUDIO_LENGTH] = {};
+    
     static bool loaded = false;
 
     // Forward declaration for fuel tank mapper
@@ -61,6 +67,8 @@ namespace aircraft_config
         {
             std::memset(name, 0, TANK_NAME_LENGTH);
         }
+        std::memset(aircraft_name, 0, AIRCRAFT_NAME_LENGTH);
+        std::memset(aircraft_studio, 0, AIRCRAFT_STUDIO_LENGTH);
 
         // Get the path to the current aircraft's .acf file
         char acfFile[256] = {};
@@ -75,10 +83,12 @@ namespace aircraft_config
             return; // File not found or cannot open
         }
 
-        // Parse the ACF file for payload station names and fuel tank names
-        // Format: "P acf/_fixed_name/0 StationName" and "P acf/_tank_name/0 TankName"
+        // Parse the ACF file for payload station names, fuel tank names, and aircraft metadata
+        // Format: "P acf/_fixed_name/0 StationName", "P acf/_tank_name/0 TankName", "P acf/_name AircraftName"
         std::regex station_pattern(R"(P acf/_fixed_name/(\d)\s+(.+))");
         std::regex tank_pattern(R"(P acf/_tank_name/(\d)\s+(.+))");
+        std::regex name_pattern(R"(P acf/_name\s+(.+))");
+        std::regex studio_pattern(R"(P acf/_studio\s+(.+))");
         std::smatch match;
         
         std::string line;
@@ -115,6 +125,24 @@ namespace aircraft_config
                                    : TANK_NAME_LENGTH - 1;
                 std::memcpy(tank_names[index], name.c_str(), copy_len);
                 tank_names[index][copy_len] = '\0';
+            }
+            else if (std::regex_search(line, match, name_pattern))
+            {
+                std::string name = match[1].str();
+                size_t copy_len = (name.length() < AIRCRAFT_NAME_LENGTH - 1) 
+                                   ? name.length() 
+                                   : AIRCRAFT_NAME_LENGTH - 1;
+                std::memcpy(aircraft_name, name.c_str(), copy_len);
+                aircraft_name[copy_len] = '\0';
+            }
+            else if (std::regex_search(line, match, studio_pattern))
+            {
+                std::string studio = match[1].str();
+                size_t copy_len = (studio.length() < AIRCRAFT_STUDIO_LENGTH - 1) 
+                                   ? studio.length() 
+                                   : AIRCRAFT_STUDIO_LENGTH - 1;
+                std::memcpy(aircraft_studio, studio.c_str(), copy_len);
+                aircraft_studio[copy_len] = '\0';
             }
         }
 
@@ -218,6 +246,26 @@ namespace aircraft_config
         return flags;
     }
 
+    // Get the aircraft name (from ACF file: P acf/_name)
+    inline const char* get_aircraft_name()
+    {
+        if (!loaded)
+        {
+            reload();
+        }
+        return aircraft_name;
+    }
+
+    // Get the aircraft studio/developer (from ACF file: P acf/_studio)
+    inline const char* get_aircraft_studio()
+    {
+        if (!loaded)
+        {
+            reload();
+        }
+        return aircraft_studio;
+    }
+
     // Clear the cache (useful for cleanup or testing)
     inline void clear()
     {
@@ -229,6 +277,8 @@ namespace aircraft_config
         {
             std::memset(name, 0, TANK_NAME_LENGTH);
         }
+        std::memset(aircraft_name, 0, AIRCRAFT_NAME_LENGTH);
+        std::memset(aircraft_studio, 0, AIRCRAFT_STUDIO_LENGTH);
         loaded = false;
     }
 
