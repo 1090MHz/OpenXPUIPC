@@ -15,6 +15,7 @@
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
 #include "impl/aircraft_config.h" // Tank name parsing
 #include <algorithm>      // std::clamp
+#include <XPlaneUtilities/XPlaneLog.h> // Tank mapping diagnostics
 
 // ===== Fuel Tank Role Mapper ================================================
 // Dynamically maps FSUIPC positional tank roles to X-Plane tank array indices.
@@ -176,6 +177,52 @@ inline FuelTankMap &fuel_tank_map()
 {
   static FuelTankMap map;
   return map;
+}
+
+// Log the current auto-detected fuel tank mapping
+inline void log_fuel_tank_mapping()
+{
+  static const char *role_names[] = {
+      "FTR_LEFT_MAIN", "FTR_LEFT_AUX", "FTR_LEFT_TIP",
+      "FTR_RIGHT_MAIN", "FTR_RIGHT_AUX", "FTR_RIGHT_TIP",
+      "FTR_CENTRE", "FTR_CENTRE2", "FTR_CENTRE3",
+      "FTR_EXT1", "FTR_EXT2"};
+
+  const FuelTankMap &map = fuel_tank_map();
+
+  XPLANE_LOG_INFO("Current fuel tank mapping:");
+  for (int i = 0; i < FTR_COUNT; ++i)
+  {
+    if (map.idx[i] >= 0)
+      XPLANE_LOG_INFO("  {:16} -> XP Tank {}", role_names[i], map.idx[i]);
+  }
+
+#ifndef NDEBUG
+  // Raw diagnostic dump — skipped entirely in Release
+  XPLANE_LOG_DEBUG("X-Plane tank names:");
+  for (int i = 0; i < 9; ++i)
+  {
+    const char *name = aircraft_config::get_tank_name(i);
+    if (name && name[0] != '\0')
+      XPLANE_LOG_DEBUG("  Tank {}: '{}'", i, name);
+  }
+
+  static XPLMDataRef r_x = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_X");
+  static XPLMDataRef r_rat = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+  if (r_x && r_rat)
+  {
+    float tx[9] = {}, rat[9] = {};
+    XPLMGetDatavf(r_x, tx, 0, 9);
+    XPLMGetDatavf(r_rat, rat, 0, 9);
+
+    XPLANE_LOG_DEBUG("Tank positions:");
+    for (int i = 0; i < 9; ++i)
+    {
+      if (rat[i] > 0.0f)
+        XPLANE_LOG_DEBUG("  Tank {}: X={:.3f} m, ratio={:.4f}", i, tx[i], rat[i]);
+    }
+  }
+#endif
 }
 
 // Provide rebuild function for aircraft_config::detail to call
