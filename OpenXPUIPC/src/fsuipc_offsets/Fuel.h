@@ -217,24 +217,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h63 = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
-         float _fv63 = 0.0f;
-         if (r_h63)
-           XPLMGetDatavf(r_h63, &_fv63, 2, 1);
-         float ratio = _fv63;
-         static XPLMDataRef r_h64 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h64 ? XPLMGetDataf(r_h64) : 0.0f);
-         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
-         if (cap <= 0.0f)
-         {
-           put<int32_t>(dst, 0);
-           return;
-         }
-         static XPLMDataRef r_h65 = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
-         float _fv65 = 0.0f;
-         if (r_h65)
-           XPLMGetDatavf(r_h65, &_fv65, 2, 1);
-         float wt = _fv65;
+         const int8_t ti = fuel_tank_map().idx[FTR_CENTRE];
+         if (ti < 0) { put<int32_t>(dst, 0); return; }
+         static XPLMDataRef r_rat  = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+         static XPLMDataRef r_tot  = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
+         static XPLMDataRef r_fuel = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
+         float ratio = 0.0f;
+         if (r_rat) XPLMGetDatavf(r_rat, &ratio, ti, 1);
+         float total = r_tot ? XPLMGetDataf(r_tot) : 0.0f;
+         float cap   = ratio * total;
+         if (cap <= 0.0f) { put<int32_t>(dst, 0); return; }
+         float wt = 0.0f;
+         if (r_fuel) XPLMGetDatavf(r_fuel, &wt, ti, 1);
          put<int32_t>(dst, static_cast<int32_t>(wt / cap * 128.0f * 65536.0f));
        },
        nullptr,
@@ -246,13 +240,13 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h66 = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
-         float _fv66 = 0.0f;
-         if (r_h66)
-           XPLMGetDatavf(r_h66, &_fv66, 2, 1);
-         float ratio = _fv66;
-         static XPLMDataRef r_h67 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h67 ? XPLMGetDataf(r_h67) : 0.0f); // acf_m_fuel_tot is in kg
+         const int8_t ti = fuel_tank_map().idx[FTR_CENTRE];
+         if (ti < 0) { put<int32_t>(dst, 0); return; }
+         static XPLMDataRef r_rat = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+         static XPLMDataRef r_tot = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
+         float ratio = 0.0f;
+         if (r_rat) XPLMGetDatavf(r_rat, &ratio, ti, 1);
+         float total = r_tot ? XPLMGetDataf(r_tot) : 0.0f;
          put<int32_t>(dst, static_cast<int32_t>(conv::kg_to_gallons(ratio * total)));
        },
        nullptr,
@@ -264,24 +258,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h68 = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
-         float _fv68 = 0.0f;
-         if (r_h68)
-           XPLMGetDatavf(r_h68, &_fv68, 0, 1);
-         float ratio = _fv68;
-         static XPLMDataRef r_h69 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h69 ? XPLMGetDataf(r_h69) : 0.0f);
-         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
-         if (cap <= 0.0f)
-         {
-           put<int32_t>(dst, 0);
-           return;
-         }
-         static XPLMDataRef r_h70 = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
-         float _fv70 = 0.0f;
-         if (r_h70)
-           XPLMGetDatavf(r_h70, &_fv70, 0, 1);
-         float wt = _fv70;
+         const int8_t ti = fuel_tank_map().idx[FTR_LEFT_MAIN];
+         if (ti < 0) { put<int32_t>(dst, 0); return; }
+         static XPLMDataRef r_rat  = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+         static XPLMDataRef r_tot  = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
+         static XPLMDataRef r_fuel = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
+         float ratio = 0.0f;
+         if (r_rat) XPLMGetDatavf(r_rat, &ratio, ti, 1);
+         float total = r_tot ? XPLMGetDataf(r_tot) : 0.0f;
+         float cap   = ratio * total;
+         if (cap <= 0.0f) { put<int32_t>(dst, 0); return; }
+         float wt = 0.0f;
+         if (r_fuel) XPLMGetDatavf(r_fuel, &wt, ti, 1);
          put<int32_t>(dst, static_cast<int32_t>(wt / cap * 128.0f * 65536.0f));
        },
        nullptr,
@@ -293,13 +281,13 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h71 = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
-         float _fv71 = 0.0f;
-         if (r_h71)
-           XPLMGetDatavf(r_h71, &_fv71, 0, 1);
-         float ratio = _fv71;
-         static XPLMDataRef r_h72 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h72 ? XPLMGetDataf(r_h72) : 0.0f); // acf_m_fuel_tot is in kg
+         const int8_t ti = fuel_tank_map().idx[FTR_LEFT_MAIN];
+         if (ti < 0) { put<int32_t>(dst, 0); return; }
+         static XPLMDataRef r_rat = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+         static XPLMDataRef r_tot = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
+         float ratio = 0.0f;
+         if (r_rat) XPLMGetDatavf(r_rat, &ratio, ti, 1);
+         float total = r_tot ? XPLMGetDataf(r_tot) : 0.0f;
          put<int32_t>(dst, static_cast<int32_t>(conv::kg_to_gallons(ratio * total)));
        },
        nullptr,
@@ -369,49 +357,37 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h73 = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
-         float _fv73 = 0.0f;
-         if (r_h73)
-           XPLMGetDatavf(r_h73, &_fv73, 3, 1);
-         float ratio = _fv73;
-         static XPLMDataRef r_h74 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h74 ? XPLMGetDataf(r_h74) : 0.0f);
-         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
-         if (cap <= 0.0f)
-         {
-           put<int32_t>(dst, 0);
-           return;
-         }
-         static XPLMDataRef r_h75 = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
-         float _fv75 = 0.0f;
-         if (r_h75)
-           XPLMGetDatavf(r_h75, &_fv75, 3, 1);
-         float wt = _fv75;
+         const int8_t ti = fuel_tank_map().idx[FTR_LEFT_TIP];
+         if (ti < 0) { put<int32_t>(dst, 0); return; }
+         static XPLMDataRef r_rat  = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+         static XPLMDataRef r_tot  = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
+         static XPLMDataRef r_fuel = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
+         float ratio = 0.0f;
+         if (r_rat) XPLMGetDatavf(r_rat, &ratio, ti, 1);
+         float total = r_tot ? XPLMGetDataf(r_tot) : 0.0f;
+         float cap   = ratio * total;
+         if (cap <= 0.0f) { put<int32_t>(dst, 0); return; }
+         float wt = 0.0f;
+         if (r_fuel) XPLMGetDatavf(r_fuel, &wt, ti, 1);
          put<int32_t>(dst, static_cast<int32_t>(wt / cap * 128.0f * 65536.0f));
        },
        [](const uint8_t *src, uint32_t, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h73 = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
-         float _fv73 = 0.0f;
-         if (r_h73)
-           XPLMGetDatavf(r_h73, &_fv73, 3, 1);
-         float ratio = _fv73;
-         static XPLMDataRef r_h74 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h74 ? XPLMGetDataf(r_h74) : 0.0f);
-         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
-         if (cap <= 0.0f)
-         {
-           return;
-         }
+         const int8_t ti = fuel_tank_map().idx[FTR_LEFT_TIP];
+         if (ti < 0) return;
+         static XPLMDataRef r_rat  = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+         static XPLMDataRef r_tot  = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
+         static XPLMDataRef r_fuel = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
+         float ratio = 0.0f;
+         if (r_rat) XPLMGetDatavf(r_rat, &ratio, ti, 1);
+         float total = r_tot ? XPLMGetDataf(r_tot) : 0.0f;
+         float cap   = ratio * total;
+         if (cap <= 0.0f) return;
          float level = take<int32_t>(src) / (128.0f * 65536.0f);
          level = std::clamp(level, 0.0f, 1.0f);
-         static XPLMDataRef r_h75 = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
-         {
-           float _sv75 = level * cap;
-           if (r_h75)
-             XPLMSetDatavf(r_h75, &_sv75, 3, 1);
-         }
+         float wt = level * cap;
+         if (r_fuel) XPLMSetDatavf(r_fuel, &wt, ti, 1);
        },
        "Left tip tank fuel level (write)"},
 
@@ -439,24 +415,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h76 = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
-         float _fv76 = 0.0f;
-         if (r_h76)
-           XPLMGetDatavf(r_h76, &_fv76, 1, 1);
-         float ratio = _fv76;
-         static XPLMDataRef r_h77 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h77 ? XPLMGetDataf(r_h77) : 0.0f);
-         float cap = ratio * total; // acf_m_fuel_tot is in kg, same units as m_fuel
-         if (cap <= 0.0f)
-         {
-           put<int32_t>(dst, 0);
-           return;
-         }
-         static XPLMDataRef r_h78 = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
-         float _fv78 = 0.0f;
-         if (r_h78)
-           XPLMGetDatavf(r_h78, &_fv78, 1, 1);
-         float wt = _fv78;
+         const int8_t ti = fuel_tank_map().idx[FTR_RIGHT_MAIN];
+         if (ti < 0) { put<int32_t>(dst, 0); return; }
+         static XPLMDataRef r_rat  = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+         static XPLMDataRef r_tot  = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
+         static XPLMDataRef r_fuel = XPLMFindDataRef("sim/flightmodel/weight/m_fuel");
+         float ratio = 0.0f;
+         if (r_rat) XPLMGetDatavf(r_rat, &ratio, ti, 1);
+         float total = r_tot ? XPLMGetDataf(r_tot) : 0.0f;
+         float cap   = ratio * total;
+         if (cap <= 0.0f) { put<int32_t>(dst, 0); return; }
+         float wt = 0.0f;
+         if (r_fuel) XPLMGetDatavf(r_fuel, &wt, ti, 1);
          put<int32_t>(dst, static_cast<int32_t>(wt / cap * 128.0f * 65536.0f));
        },
        nullptr,
@@ -468,13 +438,13 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_fuel()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h79 = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
-         float _fv79 = 0.0f;
-         if (r_h79)
-           XPLMGetDatavf(r_h79, &_fv79, 1, 1);
-         float ratio = _fv79;
-         static XPLMDataRef r_h80 = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
-         float total = (r_h80 ? XPLMGetDataf(r_h80) : 0.0f); // acf_m_fuel_tot is in kg
+         const int8_t ti = fuel_tank_map().idx[FTR_RIGHT_MAIN];
+         if (ti < 0) { put<int32_t>(dst, 0); return; }
+         static XPLMDataRef r_rat = XPLMFindDataRef("sim/aircraft/overflow/acf_tank_rat");
+         static XPLMDataRef r_tot = XPLMFindDataRef("sim/aircraft/weight/acf_m_fuel_tot");
+         float ratio = 0.0f;
+         if (r_rat) XPLMGetDatavf(r_rat, &ratio, ti, 1);
+         float total = r_tot ? XPLMGetDataf(r_tot) : 0.0f;
          put<int32_t>(dst, static_cast<int32_t>(conv::kg_to_gallons(ratio * total)));
        },
        nullptr,
