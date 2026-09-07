@@ -727,15 +727,14 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // NOTE: Original bug preserved — reads engine 0 EGT for engine 2
          static XPLMDataRef r_h57 = XPLMFindDataRef("sim/cockpit2/engine/indicators/EGT_deg_cel");
          float _fv57 = 0.0f;
          if (r_h57)
-           XPLMGetDatavf(r_h57, &_fv57, 0, 1);
+           XPLMGetDatavf(r_h57, &_fv57, 1, 1);
          put<int16_t>(dst, static_cast<int16_t>(_fv57 / 860.0f * 16384.0f));
        },
        nullptr,
-       "Engine 2 EGT (bug: reads eng0)"},
+       "Engine 2 EGT"},
 //
 //       // ENG2 Manifold Pressure — "Hg, 1024 = 1"
 //       {0x0958, 2,
@@ -931,16 +930,15 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // NOTE: Original bug preserved — reads engine 0 fuel flow for engine 2
          static XPLMDataRef r_h60 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
          float _fv60 = 0.0f;
          if (r_h60)
-           XPLMGetDatavf(r_h60, &_fv60, 0, 1);
+           XPLMGetDatavf(r_h60, &_fv60, 1, 1);
          double ff = _fv60 * 3600.0 / 0.45359237;
          put<double>(dst, ff);
        },
        nullptr,
-       "Engine 2 fuel flow (bug: reads eng0)"},
+       "Engine 2 fuel flow (lbs/hr)"},
 //
 //       // ENG3 Throttle lever — -16384 (or max reverse, usually nearer -4096)
 //       // to +16384
@@ -1310,18 +1308,22 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        },
 //        nullptr,
 //        "ENG3 Fuel elapsed time"},
-//
-//       // ENG3 Fuel Flow PPH
-//       {0x0A48, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0A48");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "ENG3 Fuel Flow PPH"},
+
+      // ENG3 Fuel Flow PPH
+      {0x0A48, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h91 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv91 = 0.0f;
+         if (r_h91)
+           XPLMGetDatavf(r_h91, &_fv91, 2, 1);
+         double ff = _fv91 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Engine 3 fuel flow (lbs/hr)"},
 //
 //       // ENG4 Throttle lever — -16384 (or max reverse, usually nearer -4096)
 //       // to +16384
@@ -1691,18 +1693,22 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        },
 //        nullptr,
 //        "ENG4 Fuel elapsed time"},
-//
-//       // ENG4 Fuel Flow PPH
-//       {0x0AE0, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0AE0");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "ENG4 Fuel Flow PPH"},
+
+      // ENG4 Fuel Flow PPH
+      {0x0AE0, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h115 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv115 = 0.0f;
+         if (r_h115)
+           XPLMGetDatavf(r_h115, &_fv115, 3, 1);
+         double ff = _fv115 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Engine 4 fuel flow (lbs/hr)"},
 
       // Turb. ENG1 N1 %
       {0x2000, 8,
@@ -1751,14 +1757,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 1 N2 %"},
-//
-//       // Turb. ENG1 Corrected Fuel Flow — Pounds per hour, jets and turbos
-//       // only
-//       {0x2020, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Turb. ENG1 Corrected Fuel Flow"},
+
+      // Turb. ENG1 Corrected Fuel Flow — Pounds per hour, jets and turbos
+      // only. X-Plane's fuel flow already accounts for atmospheric conditions.
+      {0x2020, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h119 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv119 = 0.0f;
+         if (r_h119)
+           XPLMGetDatavf(r_h119, &_fv119, 0, 1);
+         double ff = _fv119 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Turb. ENG1 Corrected Fuel Flow"},
 //
 //       // Turb. ENG1 Max Torque fraction
 //       {0x2028, 8,
@@ -1926,13 +1941,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 2 N2 %"},
-//
-//       // Turb. ENG2 Corrected FF — Pounds per hour, jets and turbos only
-//       {0x2120, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Turb. ENG2 Corrected FF"},
+
+      // Turb. ENG2 Corrected FF — Pounds per hour, jets and turbos only.
+      // X-Plane's fuel flow already accounts for atmospheric conditions.
+      {0x2120, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h121 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv121 = 0.0f;
+         if (r_h121)
+           XPLMGetDatavf(r_h121, &_fv121, 1, 1);
+         double ff = _fv121 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Turb. ENG2 Corrected FF"},
 //
 //       // Turb. ENG2 Max Torque fraction
 //       {0x2128, 8,
@@ -2084,13 +2109,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        nullptr,
 //        nullptr,
 //        "Turb. ENG3 Corrected N2 %"},
-//
-//       // Turb. ENG3 Corrected FF — Pounds per hour, jets and turbos only
-//       {0x2220, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Turb. ENG3 Corrected FF"},
+
+      // Turb. ENG3 Corrected FF — Pounds per hour, jets and turbos only.
+      // X-Plane's fuel flow already accounts for atmospheric conditions.
+      {0x2220, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h131 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv131 = 0.0f;
+         if (r_h131)
+           XPLMGetDatavf(r_h131, &_fv131, 2, 1);
+         double ff = _fv131 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Turb. ENG3 Corrected FF"},
 //
 //       // Turb. ENG3 Max Torque fraction
 //       {0x2228, 8,
@@ -2242,13 +2277,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        nullptr,
 //        nullptr,
 //        "Turb. ENG4 Corrected N2 %"},
-//
-//       // Turb. ENG4 Corrected FF — Pounds per hour, jets and turbos only
-//       {0x2320, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Turb. ENG4 Corrected FF"},
+
+      // Turb. ENG4 Corrected FF — Pounds per hour, jets and turbos only.
+      // X-Plane's fuel flow already accounts for atmospheric conditions.
+      {0x2320, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_h141 = XPLMFindDataRef("sim/flightmodel/engine/ENGN_FF_");
+         float _fv141 = 0.0f;
+         if (r_h141)
+           XPLMGetDatavf(r_h141, &_fv141, 3, 1);
+         double ff = _fv141 * 3600.0 / 0.45359237;
+         put<double>(dst, ff);
+       },
+       nullptr,
+       "Turb. ENG4 Corrected FF"},
 //
 //       // Turb. ENG4 Max Torque fraction
 //       {0x2328, 8,
