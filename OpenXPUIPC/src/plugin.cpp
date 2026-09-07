@@ -261,6 +261,11 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void *inPa
             // User aircraft loaded — reload aircraft-specific configuration
             XPLANE_LOG_INFO("User aircraft loaded - reloading aircraft configuration (payload stations, etc.)");
             aircraft_config::reload();
+
+            // Log auto-detected tank mapping — the primary diagnostic when a user reports bad fuel
+            // readouts on an aircraft the auto-detection heuristic was not tested against.
+            log_fuel_tank_mapping();
+
             sim_state::set_ready_to_fly(true);
         }
     }
