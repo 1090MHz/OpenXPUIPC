@@ -3048,15 +3048,15 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
        nullptr,
        "Aircraft path (full)"},
 
-      // Aircraft name string — String of up to 256 characters giving the
-      // current aircraft name (in FS2k only).
+      // Aircraft name string — from the "title" parameter in aircraft.acf
+      // acf_ui_name is the X-Plane 12 dataref equivalent (name as shown in the UI).
       {0x3D00, 256,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
          std::memset(dst, 0, 256);
-         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/view/acf_descrip");
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/view/acf_ui_name");
          if (r)
            XPLMGetDatab(r, dst, 0, 255);
          dst[255] = 0;
