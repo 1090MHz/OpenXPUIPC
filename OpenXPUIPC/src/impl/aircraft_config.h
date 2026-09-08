@@ -9,8 +9,7 @@
 //
 // Usage:
 //   In plugin.cpp XPluginReceiveMessage():
-//     if (inMsg == 102 && inParam == 0) // XPLM_MSG_PLANE_LOADED, user aircraft
-//       aircraft_config::reload();
+//     case XPLM_MSG_PLANE_LOADED: if (inParam == 0) aircraft_config::reload();
 //
 //   In offset handlers:
 //     const char* name = aircraft_config::get_station_name(0); // Station 0-8
