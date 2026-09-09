@@ -274,11 +274,20 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void *inPa
 {
     (void)inFrom; // unused
 
-    // XPLM_MSG_PLANE_LOADED = 102
-    // inParam: 0 = user aircraft, 1-19 = AI aircraft
-    if (inMsg == 102)
+    XPLANE_LOG_DEBUG("XPluginReceiveMessage: inMsg={} ({}), inParam={}",
+                     inMsg, xplm_msg_name(inMsg), reinterpret_cast<intptr_t>(inParam));
+
+    switch (inMsg)
     {
+    case XPLM_MSG_PLANE_LOADED:
+    {
+        // inParam: 0 = user aircraft, 1-19 = multiplayer plane slots (see XPLMPlanes)
         int aircraft_index = static_cast<int>(reinterpret_cast<intptr_t>(inParam));
+
+        XPLANE_LOG_DEBUG("XPLM_MSG_PLANE_LOADED received: aircraft_index={} ({})",
+                         aircraft_index,
+                         aircraft_index == 0 ? "USER AIRCRAFT" : "MULTIPLAYER PLANE SLOT");
+
         if (aircraft_index == 0)
         {
             // User aircraft loaded — reload aircraft-specific configuration
@@ -291,5 +300,24 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void *inPa
 
             sim_state::set_ready_to_fly(true);
         }
+        break;
+    }
+    case XPLM_MSG_PLANE_CRASHED:
+    case XPLM_MSG_AIRPORT_LOADED:
+    case XPLM_MSG_SCENERY_LOADED:
+    case XPLM_MSG_AIRPLANE_COUNT_CHANGED:
+    case XPLM_MSG_PLANE_UNLOADED:
+    case XPLM_MSG_WILL_WRITE_PREFS:
+    case XPLM_MSG_LIVERY_LOADED:
+    case XPLM_MSG_ENTERED_VR:
+    case XPLM_MSG_EXITING_VR:
+    case XPLM_MSG_RELEASE_PLANES:
+    case XPLM_MSG_FMOD_BANK_LOADED:
+    case XPLM_MSG_FMOD_BANK_UNLOADING:
+    case XPLM_MSG_DATAREFS_ADDED:
+        // Logged above via xplm_msg_name(); no additional handling needed yet.
+        break;
+    default:
+        break;
     }
 }
