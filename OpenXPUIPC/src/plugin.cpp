@@ -99,16 +99,18 @@ static void cycle_log_level()
 static void menu_handler(void *, void *item_ref)
 {
     int id = static_cast<int>(reinterpret_cast<intptr_t>(item_ref));
+#ifndef NDEBUG
     switch (id)
     {
-#ifndef NDEBUG
     case MENU_LOG_LEVEL:
         cycle_log_level();
         break;
-#endif
     default:
         break;
     }
+#else
+    (void)id; // Suppress unused parameter warning in release builds
+#endif
 }
 
 static void create_menu()
