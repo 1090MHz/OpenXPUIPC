@@ -247,6 +247,29 @@ PLUGIN_API void XPluginStop()
     XPlaneLog::shutdown();
 }
 
+// Readable name for known X-Plane SDK plugin messages (101-114), for logging only.
+static const char *xplm_msg_name(int inMsg)
+{
+    switch (inMsg)
+    {
+    case XPLM_MSG_PLANE_CRASHED: return "XPLM_MSG_PLANE_CRASHED";
+    case XPLM_MSG_PLANE_LOADED: return "XPLM_MSG_PLANE_LOADED";
+    case XPLM_MSG_AIRPORT_LOADED: return "XPLM_MSG_AIRPORT_LOADED";
+    case XPLM_MSG_SCENERY_LOADED: return "XPLM_MSG_SCENERY_LOADED";
+    case XPLM_MSG_AIRPLANE_COUNT_CHANGED: return "XPLM_MSG_AIRPLANE_COUNT_CHANGED";
+    case XPLM_MSG_PLANE_UNLOADED: return "XPLM_MSG_PLANE_UNLOADED";
+    case XPLM_MSG_WILL_WRITE_PREFS: return "XPLM_MSG_WILL_WRITE_PREFS";
+    case XPLM_MSG_LIVERY_LOADED: return "XPLM_MSG_LIVERY_LOADED";
+    case XPLM_MSG_ENTERED_VR: return "XPLM_MSG_ENTERED_VR";
+    case XPLM_MSG_EXITING_VR: return "XPLM_MSG_EXITING_VR";
+    case XPLM_MSG_RELEASE_PLANES: return "XPLM_MSG_RELEASE_PLANES";
+    case XPLM_MSG_FMOD_BANK_LOADED: return "XPLM_MSG_FMOD_BANK_LOADED";
+    case XPLM_MSG_FMOD_BANK_UNLOADING: return "XPLM_MSG_FMOD_BANK_UNLOADING";
+    case XPLM_MSG_DATAREFS_ADDED: return "XPLM_MSG_DATAREFS_ADDED";
+    default: return "UNKNOWN";
+    }
+}
+
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void *inParam)
 {
     (void)inFrom; // unused
