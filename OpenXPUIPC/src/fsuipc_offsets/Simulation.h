@@ -14,6 +14,7 @@
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
 #include "impl/sim_state.h"
+#include "impl/touchdown.h"
 #include "ui/toast_notification.h"
 #include <XPLMUtilities.h>
 #include <algorithm>
