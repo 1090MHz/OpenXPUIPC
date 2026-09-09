@@ -3,7 +3,7 @@
 #pragma once
 #include <cmath>
 #include <cstdint>
-#include "XPLMDataAccess.h"
+#include <XPLMDataAccess.h>
 
 namespace conv {
 

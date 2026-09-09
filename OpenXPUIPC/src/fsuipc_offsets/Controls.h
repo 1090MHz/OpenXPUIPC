@@ -695,25 +695,32 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_controls()
        },
        nullptr,
        "Gear position left (0=up, 16383=down)"},
-//
-//       // Flaps index — 0 = full up
-//       {0x0BFC, 1,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0BFC");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0BFC");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
-//        },
-//        "Flaps index"},
+
+      // Flaps index — 0 = full up
+      {0x0BFC, 1,
+       // Read/Write: Read/Write
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         // Handle-commanded ratio (not the lagged actual surface ratio) mapped to nearest detent index
+         static XPLMDataRef r_ratio = XPLMFindDataRef("sim/flightmodel2/controls/flap_handle_deploy_ratio");
+         static XPLMDataRef r_detents = XPLMFindDataRef("sim/aircraft/controls/acf_flap_detents");
+         int detents = r_detents ? XPLMGetDatai(r_detents) : 1;
+         float ratio = r_ratio ? XPLMGetDataf(r_ratio) : 0.0f;
+         int index = (detents > 1) ? static_cast<int>(ratio * (detents - 1) + 0.5f) : 0;
+         put<uint8_t>(dst, static_cast<uint8_t>(index));
+       },
+       [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
+       {
+         (void)dref;
+         (void)sz;
+         static XPLMDataRef r_ratio = XPLMFindDataRef("sim/flightmodel2/controls/flap_handle_deploy_ratio");
+         static XPLMDataRef r_detents = XPLMFindDataRef("sim/aircraft/controls/acf_flap_detents");
+         int detents = r_detents ? XPLMGetDatai(r_detents) : 1;
+         if (r_ratio && detents > 1)
+           XPLMSetDataf(r_ratio, static_cast<float>(take<uint8_t>(src)) / (detents - 1));
+       },
+       "Flaps index"},
 //
 //       // Right Brake Timer — Toe brake action: value from 0-200 here gives
 //       // variable breaking, and decreasing braking proportionally with time.

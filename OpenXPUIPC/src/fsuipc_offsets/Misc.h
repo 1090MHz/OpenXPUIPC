@@ -223,21 +223,25 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_misc()
        nullptr,
        "Airline / manufacturer (24 chars)"},
 
-      // ATC airxraft type [FS2002+] — String, up to 24 chars inclusing zero
-      // terminator
+      // ATC aircraft type [FS2002+] — String, up to 24 chars inclusing zero
+      // terminator.
+      
+      // Real-world atc_type values (e.g. "LAKE") aren't ICAO
+      // codes, but acf_ICAO is a more stable/useful identifier than a
+      // free-text description.
       {0x3160, 24,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
          std::memset(dst, 0, 24);
-         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/view/acf_descrip");
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/view/acf_ICAO");
          if (r)
            XPLMGetDatab(r, dst, 0, 23);
          dst[23] = 0;
        },
        nullptr,
-       "Aircraft model name (24 chars)"},
+       "Aircraft type (24 chars)"},
 //
 //       // Protected Options control
 //       {0x32F0, 4,

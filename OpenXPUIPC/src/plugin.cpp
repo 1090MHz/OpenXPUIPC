@@ -99,16 +99,18 @@ static void cycle_log_level()
 static void menu_handler(void *, void *item_ref)
 {
     int id = static_cast<int>(reinterpret_cast<intptr_t>(item_ref));
+#ifndef NDEBUG
     switch (id)
     {
-#ifndef NDEBUG
     case MENU_LOG_LEVEL:
         cycle_log_level();
         break;
-#endif
     default:
         break;
     }
+#else
+    (void)id; // Suppress unused parameter warning in release builds
+#endif
 }
 
 static void create_menu()
@@ -247,15 +249,47 @@ PLUGIN_API void XPluginStop()
     XPlaneLog::shutdown();
 }
 
+// Readable name for known X-Plane SDK plugin messages (101-114), for logging only.
+static const char *xplm_msg_name(int inMsg)
+{
+    switch (inMsg)
+    {
+    case XPLM_MSG_PLANE_CRASHED: return "XPLM_MSG_PLANE_CRASHED";
+    case XPLM_MSG_PLANE_LOADED: return "XPLM_MSG_PLANE_LOADED";
+    case XPLM_MSG_AIRPORT_LOADED: return "XPLM_MSG_AIRPORT_LOADED";
+    case XPLM_MSG_SCENERY_LOADED: return "XPLM_MSG_SCENERY_LOADED";
+    case XPLM_MSG_AIRPLANE_COUNT_CHANGED: return "XPLM_MSG_AIRPLANE_COUNT_CHANGED";
+    case XPLM_MSG_PLANE_UNLOADED: return "XPLM_MSG_PLANE_UNLOADED";
+    case XPLM_MSG_WILL_WRITE_PREFS: return "XPLM_MSG_WILL_WRITE_PREFS";
+    case XPLM_MSG_LIVERY_LOADED: return "XPLM_MSG_LIVERY_LOADED";
+    case XPLM_MSG_ENTERED_VR: return "XPLM_MSG_ENTERED_VR";
+    case XPLM_MSG_EXITING_VR: return "XPLM_MSG_EXITING_VR";
+    case XPLM_MSG_RELEASE_PLANES: return "XPLM_MSG_RELEASE_PLANES";
+    case XPLM_MSG_FMOD_BANK_LOADED: return "XPLM_MSG_FMOD_BANK_LOADED";
+    case XPLM_MSG_FMOD_BANK_UNLOADING: return "XPLM_MSG_FMOD_BANK_UNLOADING";
+    case XPLM_MSG_DATAREFS_ADDED: return "XPLM_MSG_DATAREFS_ADDED";
+    default: return "UNKNOWN";
+    }
+}
+
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void *inParam)
 {
     (void)inFrom; // unused
 
-    // XPLM_MSG_PLANE_LOADED = 102
-    // inParam: 0 = user aircraft, 1-19 = AI aircraft
-    if (inMsg == 102)
+    XPLANE_LOG_DEBUG("XPluginReceiveMessage: inMsg={} ({}), inParam={}",
+                     inMsg, xplm_msg_name(inMsg), reinterpret_cast<intptr_t>(inParam));
+
+    switch (inMsg)
     {
+    case XPLM_MSG_PLANE_LOADED:
+    {
+        // inParam: 0 = user aircraft, 1-19 = multiplayer plane slots (see XPLMPlanes)
         int aircraft_index = static_cast<int>(reinterpret_cast<intptr_t>(inParam));
+
+        XPLANE_LOG_DEBUG("XPLM_MSG_PLANE_LOADED received: aircraft_index={} ({})",
+                         aircraft_index,
+                         aircraft_index == 0 ? "USER AIRCRAFT" : "MULTIPLAYER PLANE SLOT");
+
         if (aircraft_index == 0)
         {
             // User aircraft loaded — reload aircraft-specific configuration
@@ -268,5 +302,24 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void *inPa
 
             sim_state::set_ready_to_fly(true);
         }
+        break;
+    }
+    case XPLM_MSG_PLANE_CRASHED:
+    case XPLM_MSG_AIRPORT_LOADED:
+    case XPLM_MSG_SCENERY_LOADED:
+    case XPLM_MSG_AIRPLANE_COUNT_CHANGED:
+    case XPLM_MSG_PLANE_UNLOADED:
+    case XPLM_MSG_WILL_WRITE_PREFS:
+    case XPLM_MSG_LIVERY_LOADED:
+    case XPLM_MSG_ENTERED_VR:
+    case XPLM_MSG_EXITING_VR:
+    case XPLM_MSG_RELEASE_PLANES:
+    case XPLM_MSG_FMOD_BANK_LOADED:
+    case XPLM_MSG_FMOD_BANK_UNLOADING:
+    case XPLM_MSG_DATAREFS_ADDED:
+        // Logged above via xplm_msg_name(); no additional handling needed yet.
+        break;
+    default:
+        break;
     }
 }
