@@ -14,6 +14,26 @@
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
 
+inline double fsuipc_prop_speed_rpm(int prop_index)
+{
+  static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/engine/indicators/prop_speed_rpm");
+  float v = 0.0f;
+  if (r)
+    XPLMGetDatavf(r, &v, prop_index, 1);
+  return static_cast<double>(v);
+}
+
+inline double fsuipc_prop_rpm_fraction(int prop_index)
+{
+  static XPLMDataRef r_speed = XPLMFindDataRef("sim/cockpit2/engine/indicators/prop_speed_rsc");
+  static XPLMDataRef r_redline = XPLMFindDataRef("sim/aircraft/controls/acf_RSC_redline_prp");
+  float speed_rsc = 0.0f;
+  if (r_speed)
+    XPLMGetDatavf(r_speed, &speed_rsc, prop_index, 1);
+  float redline_rsc = r_redline ? XPLMGetDataf(r_redline) : 0.0f;
+  return redline_rsc > 0.0f ? static_cast<double>(speed_rsc / redline_rsc) : 0.0;
+}
+
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 {
   static const std::vector<OffsetEntry> table = {
@@ -2414,28 +2434,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        },
 //        "Turb. ENG4 Ignition Switch"},
 //
-//       // Prop1 RPM — For props and turboprops
-//       {0x2400, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Prop1 RPM"},
-
-      // Prop1 RPM fraction — RPM as a fraction of the maximim. For props and
-      // turboprops
-      {0x2408, 8,
-       // Read/Write: Unknown
+      // Prop1 RPM — For props and turboprops
+      {0x2400, 8,
+       // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/engine/acf_RSC_redline_eng_per_engine");
-         float v = 0.0f;
-         if (r)
-           XPLMGetDatavf(r, &v, 0, 1);
-         put<double>(dst, static_cast<double>(v));
+         put<double>(dst, fsuipc_prop_speed_rpm(0));
        },
        nullptr,
-       "Prop 1 RPM redline (rad/s, double)"},
+       "Prop1 RPM"},
+
+      // Prop1 RPM fraction — RPM as a fraction of the maximum. For props and
+      // turboprops
+      {0x2408, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<double>(dst, fsuipc_prop_rpm_fraction(0));
+       },
+       nullptr,
+       "Prop1 RPM fraction"},
 //
 //       // Prop1 Thrust — In pounds. For props and turboprops
 //       {0x2410, 8,
@@ -2479,28 +2499,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        nullptr,
 //        "Prop1 Autofeather armed"},
 //
-//       // Prop2 RPM — For props and turboprops
-//       {0x2500, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Prop2 RPM"},
-
-      // Prop2 RPM fraction — RPM as a fraction of the maximim. For props and
-      // turboprops
-      {0x2508, 8,
-       // Read/Write: Unknown
+      // Prop2 RPM — For props and turboprops
+      {0x2500, 8,
+       // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/engine/acf_RSC_redline_eng_per_engine");
-         float v = 0.0f;
-         if (r)
-           XPLMGetDatavf(r, &v, 1, 1);
-         put<double>(dst, static_cast<double>(v));
+         put<double>(dst, fsuipc_prop_speed_rpm(1));
        },
        nullptr,
-       "Prop 2 RPM redline (rad/s, double)"},
+       "Prop2 RPM"},
+
+      // Prop2 RPM fraction — RPM as a fraction of the maximum. For props and
+      // turboprops
+      {0x2508, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<double>(dst, fsuipc_prop_rpm_fraction(1));
+       },
+       nullptr,
+       "Prop2 RPM fraction"},
 //
 //       // Prop2 Thrust — In pounds. For props and turboprops
 //       {0x2510, 8,
@@ -2544,20 +2564,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        nullptr,
 //        "Prop2 Autofeather armed"},
 //
-//       // Prop3 RPM — For props and turboprops
-//       {0x2600, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Prop3 RPM"},
-//
-//       // Prop3 RPM fraction — RPM as a fraction of the maximim. For props and
-//       // turboprops
-//       {0x2608, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Prop3 RPM fraction"},
+      // Prop3 RPM — For props and turboprops
+      {0x2600, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<double>(dst, fsuipc_prop_speed_rpm(2));
+       },
+       nullptr,
+       "Prop3 RPM"},
+
+      // Prop3 RPM fraction — RPM as a fraction of the maximum. For props and
+      // turboprops
+      {0x2608, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<double>(dst, fsuipc_prop_rpm_fraction(2));
+       },
+       nullptr,
+       "Prop3 RPM fraction"},
 //
 //       // Prop3 Thrust — In pounds. For props and turboprops
 //       {0x2610, 8,
@@ -2601,20 +2629,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //        nullptr,
 //        "Prop3 Autofeather armed"},
 //
-//       // Prop4 RPM — For props and turboprops
-//       {0x2700, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Prop4 RPM"},
-//
-//       // Prop4 RPM fraction — RPM as a fraction of the maximim. For props and
-//       // turboprops
-//       {0x2708, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Prop4 RPM fraction"},
+      // Prop4 RPM — For props and turboprops
+      {0x2700, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<double>(dst, fsuipc_prop_speed_rpm(3));
+       },
+       nullptr,
+       "Prop4 RPM"},
+
+      // Prop4 RPM fraction — RPM as a fraction of the maximum. For props and
+      // turboprops
+      {0x2708, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<double>(dst, fsuipc_prop_rpm_fraction(3));
+       },
+       nullptr,
+       "Prop4 RPM fraction"},
 //
 //       // Prop4 Thrust — In pounds. For props and turboprops
 //       {0x2710, 8,
