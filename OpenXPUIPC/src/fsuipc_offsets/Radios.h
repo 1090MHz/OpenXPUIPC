@@ -82,7 +82,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          std::memcpy(dst, s.id, 6);
        },
        nullptr,
-       "ADF2 station ID"},
+       "ADF2 station ID", RefreshRate::Low},
 //
 //       // NDB2 name (FS2004) — 25 byte character string including zero
 //       // terminator
@@ -455,7 +455,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          put<uint16_t>(dst, static_cast<uint16_t>(c / 360.0f * 65536.0f));
        },
        nullptr,
-       "NAV2 ILS inverse runway heading"},
+       "NAV2 ILS inverse runway heading", RefreshRate::Low},
 //
 //       // VOR2 GS angle (FS2002+)
 //       {0x0846, 2,
@@ -514,7 +514,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          put<int32_t>(dst, static_cast<int32_t>(s.lat / 90.0f * 10001750.0f));
        },
        nullptr,
-       "NAV2 station latitude"},
+       "NAV2 station latitude", RefreshRate::Low},
 
       // VOR1 or GS Lat
       {0x085C, 4,
@@ -525,7 +525,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          put<int32_t>(dst, static_cast<int32_t>(s.lat / 90.0f * 10001750.0f));
        },
        nullptr,
-       "NAV1 station latitude"},
+       "NAV1 station latitude", RefreshRate::Low},
 
       // VOR2 or GS Long (FS2002+)
       {0x0860, 4,
@@ -536,7 +536,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          put<int32_t>(dst, static_cast<int32_t>(s.lon / 360.0 * conv::FSUIPC_360_32));
        },
        nullptr,
-       "NAV2 station longitude"},
+       "NAV2 station longitude", RefreshRate::Low},
 
       // VOR1 or GS Long
       {0x0864, 4,
@@ -547,7 +547,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          put<int32_t>(dst, static_cast<int32_t>(s.lon / 360.0 * conv::FSUIPC_360_32));
        },
        nullptr,
-       "NAV1 station longitude"},
+       "NAV1 station longitude", RefreshRate::Low},
 //
 //       // VOR2 or GS Elevation (FS2002+)
 //       {0x0868, 4,
@@ -593,7 +593,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          put<uint16_t>(dst, static_cast<uint16_t>(c / 360.0f * 65536.0f));
        },
        nullptr,
-       "NAV1 ILS inverse runway heading"},
+       "NAV1 ILS inverse runway heading", RefreshRate::Low},
 //
 //       // VOR1 GS angle
 //       {0x0872, 2,
@@ -1514,7 +1514,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          std::memcpy(dst, s.id, 6);
        },
        nullptr,
-       "NAV1 station ID"},
+       "NAV1 station ID", RefreshRate::Low},
 
       // VOR1 name — Name string, up to 25 chars incl zero terminator
       {0x3006, 25,
@@ -1525,7 +1525,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          write_cstr(dst, 25, s.name);
        },
        nullptr,
-       "NAV1 station name"},
+       "NAV1 station name", RefreshRate::Low},
 
       // VOR2 identity — ID string, up to 6 chars incl zero terminator
       {0x301F, 6,
@@ -1536,7 +1536,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          std::memcpy(dst, s.id, 6);
        },
        nullptr,
-       "NAV2 station ID"},
+       "NAV2 station ID", RefreshRate::Low},
 
       // VOR2 name — Name string, up to 25 chars incl zero terminator
       {0x3025, 25,
@@ -1547,7 +1547,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          write_cstr(dst, 25, s.name);
        },
        nullptr,
-       "NAV2 station name"},
+       "NAV2 station name", RefreshRate::Low},
 
       // NDB identity — ID string, up to 6 chars incl zero terminator
       {0x303E, 6,
@@ -1558,7 +1558,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          std::memcpy(dst, s.id, 6);
        },
        nullptr,
-       "ADF1 station ID"},
+       "ADF1 station ID", RefreshRate::Low},
 
       // NDB name — Name string, up to 25 chars incl zero terminator
       {0x3044, 25,
@@ -1569,7 +1569,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
          write_cstr(dst, 25, s.name);
        },
        nullptr,
-       "ADF1 station name"},
+       "ADF1 station name", RefreshRate::Low},
 //
 //       // VOR1 morse ID switch — 0=off, 1=on
 //       {0x3105, 1,

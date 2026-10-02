@@ -40,12 +40,18 @@ inline void write_cstr(uint8_t* dst, uint32_t dst_size, const char* src) {
 using ReaderFn = void(*)(uint8_t* dst, DataRefCache& dref);
 using WriterFn = void(*)(const uint8_t* src, uint32_t size, DataRefCache& dref);
 
+// How often a handler needs to be refreshed. High = every bridge tick
+// (~18 Hz); Low = a slower cadence, for handlers whose underlying data
+// changes infrequently or is expensive to recompute (e.g. NavAid searches).
+enum class RefreshRate { High, Low };
+
 struct OffsetEntry {
     uint32_t offset;
     uint32_t size;
     ReaderFn read;
     WriterFn write;       // nullptr = read-only
     const char* desc;
+    RefreshRate rate = RefreshRate::High;
 };
 
 // -------------------------------------------------------------------

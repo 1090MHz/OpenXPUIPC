@@ -6,8 +6,9 @@
 // outside a valid XPLM callback context. Therefore, read() and write() MUST NOT
 // call XPLM APIs or access DataRefs directly.
 //
-// All DataRef access is performed in update(), which runs from a flight-loop
-// callback and therefore executes in a valid XPLM context.
+// All DataRef access is performed in update_high_rate_offsets() and
+// update_low_rate_offsets(), which run from flight-loop callbacks and
+// therefore execute in a valid XPLM context.
 #pragma once
 
 #include <XPlaneUtilities/XPlaneLog.h>
@@ -31,18 +32,25 @@ public:
         // Register custom cfg table last so custom entries can override production offsets.
         register_table(cfg_offset_table());
 
-        // Pre-build a flat, cache-friendly list of readable entries for update().
-        // Avoids per-call unordered_map bucket traversal overhead.
-        read_list_.reserve(index_.size());
-        for (const auto& [off, entry] : index_)
-            if (entry->read && off + entry->size <= sizeof(buf_))
-                read_list_.emplace_back(off, entry);
+        // Pre-build flat, cache-friendly lists of readable entries, split by
+        // refresh rate. Avoids per-call unordered_map bucket traversal overhead
+        // and lets high-rate and low-rate flight loops each refresh only their
+        // own subset.
+        read_list_high_.reserve(index_.size());
+        read_list_low_.reserve(index_.size());
+        for (const auto& [off, entry] : index_) {
+            if (!entry->read || off + entry->size > sizeof(buf_)) continue;
+            if (entry->rate == RefreshRate::Low)
+                read_list_low_.emplace_back(off, entry);
+            else
+                read_list_high_.emplace_back(off, entry);
+        }
     }
 
-    // Called from flight-loop callback (valid XPLM context).
-    // Refreshes the shadow buffer from live DataRefs and processes
-    // any pending write-handler calls.
-    void update() {
+    // Called from the high-rate flight-loop callback (~18 Hz, valid XPLM
+    // context). Refreshes fast-changing entries and processes any pending
+    // write-handler calls.
+    void update_high_rate_offsets() {
         // Refresh the flight-loop watchdog timestamp for suspended-simulation detection.
         sim_state::update_flight_loop_watchdog_timestamp();
 
@@ -54,12 +62,20 @@ public:
         }
         pending_writes_.clear();
 
-        // 2. Refresh all read entries into buf_ via pre-built flat list
-        for (const auto& [off, entry] : read_list_)
+        // 2. Refresh high-rate entries into buf_ via pre-built flat list
+        for (const auto& [off, entry] : read_list_high_)
             entry->read(buf_ + off, dr_);
 
         // 3. Increment activity counter (heartbeat for crash detection)
         sim_state::increment_activity_counter();
+    }
+
+    // Called from the low-rate flight-loop callback (slower cadence, valid
+    // XPLM context). Refreshes entries tagged RefreshRate::Low, e.g. NavAid
+    // searches, which are expensive to repeat every high-rate tick.
+    void update_low_rate_offsets() {
+        for (const auto& [off, entry] : read_list_low_)
+            entry->read(buf_ + off, dr_);
     }
 
     // Read `size` bytes starting at `offset` into `dst`.
@@ -156,6 +172,7 @@ private:
     DataRefCache dr_;
     uint8_t buf_[0x10000]{};  // 64 KB shadow buffer, zero-initialized
     std::unordered_map<uint32_t, const OffsetEntry*> index_;
-    std::vector<std::pair<uint32_t, const OffsetEntry*>> read_list_;  // flat copy of readable entries
+    std::vector<std::pair<uint32_t, const OffsetEntry*>> read_list_high_; // readable entries refreshed at high rate
+    std::vector<std::pair<uint32_t, const OffsetEntry*>> read_list_low_;  // readable entries refreshed at low rate
     std::vector<PendingWrite> pending_writes_;
 };
