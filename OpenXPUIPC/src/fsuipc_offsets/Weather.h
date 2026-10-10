@@ -184,19 +184,15 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
 //        nullptr,
 //        "Dew point"},
 
-      // Ambient wind speed — knots (at aircraft)
+      // Ambient wind speed — knots (at aircraft, altitude-interpolated by X-Plane)
       {0x0E90, 2,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // Use element 1 from weather arrays (element 0 appears to be unreliable)
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_speed_kts");
-         float _wsp = 0.0f;
-         if (r) {
-           XPLMGetDatavf(r, &_wsp, 1, 1); // Read element 1
-         }
-         put<int16_t>(dst, static_cast<int16_t>(_wsp));
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_now_speed_msc");
+         float _wsp_msc = r ? XPLMGetDataf(r) : 0.0f;
+         put<int16_t>(dst, static_cast<int16_t>(_wsp_msc * 1.943844f)); // m/s -> kts
        },
        nullptr,
        "Wind speed (kts)"},
@@ -208,12 +204,9 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         // Use element 1 - already in true degrees (0-360)
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_direction_degt");
-         float _wdir = 0.0f;
-         if (r) {
-           XPLMGetDatavf(r, &_wdir, 1, 1); // Read element 1
-         }
+         // Already altitude-interpolated by X-Plane, true degrees (0-360)
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_now_direction_degt");
+         float _wdir = r ? XPLMGetDataf(r) : 0.0f;
          // Convert to FSUIPC format: 65536 = 360 degrees
          put<uint16_t>(dst, static_cast<uint16_t>(_wdir / 360.0f * 65536.0f));
        },
@@ -2248,34 +2241,26 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
 //        nullptr,
 //        "Ambient wind Z [FS2002+] m/sec"},
 //
-      // Ambient wind velocity [FS2002+] m/sec
+      // Ambient wind velocity [FS2002+] m/sec (altitude-interpolated by X-Plane)
       {0x3488, 8,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_speed_kts");
-         float _wsp = 0.0f;
-         if (r) {
-           XPLMGetDatavf(r, &_wsp, 1, 1); // Read element 1
-         }
-         put<double>(dst, static_cast<double>(_wsp) * 0.514444);
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_now_speed_msc");
+         put<double>(dst, static_cast<double>(r ? XPLMGetDataf(r) : 0.0f));
        },
        nullptr,
        "Ambient wind velocity [FS2002+] m/sec"},
 //
-      // Ambient wind direction [FS2002+]
+      // Ambient wind direction [FS2002+] (altitude-interpolated by X-Plane)
       {0x3490, 8,
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_direction_degt");
-         float _wdir = 0.0f;
-         if (r) {
-           XPLMGetDatavf(r, &_wdir, 1, 1); // Read element 1
-         }
-         put<double>(dst, static_cast<double>(_wdir));
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_now_direction_degt");
+         put<double>(dst, static_cast<double>(r ? XPLMGetDataf(r) : 0.0f));
        },
        nullptr,
        "Ambient wind direction [FS2002+]"},
