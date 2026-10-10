@@ -41,13 +41,21 @@ static std::unique_ptr<IpcServer> ipc_server;
 static XPLMMenuID menu_id = nullptr;
 static int menu_container = -1;
 static XPLMFlightLoopID bridge_loop = nullptr;
+static XPLMFlightLoopID bridge_low_rate_loop = nullptr;
 
-// ---------- Bridge update flight loop ----------
+// ---------- Bridge update flight loops ----------
 static float bridge_update_cb(float, float, int, void *)
 {
     if (bridge)
-        bridge->update();
+        bridge->update_high_rate_offsets();
     return 1.0f / 18.0f; // ~18 Hz — matches FSUIPC polling rate; no benefit updating faster
+}
+
+static float bridge_low_rate_update_cb(float, float, int, void *)
+{
+    if (bridge)
+        bridge->update_low_rate_offsets();
+    return 1.0f / 2.0f; // 2 Hz — for slow-changing/expensive entries (e.g. NavAid searches)
 }
 
 // ---------- Menu ----------
@@ -202,12 +210,23 @@ PLUGIN_API int XPluginEnable()
     bridge_loop = XPLMCreateFlightLoop(&fl);
     XPLMScheduleFlightLoop(bridge_loop, -1.0f, 1);
 
-    // Seed the buffer NOW — the flight loop is only scheduled, not yet fired.
+    // Low-rate bridge update loop — refreshes slow-changing/expensive entries
+    // (e.g. NavAid searches) at a reduced cadence.
+    XPLMCreateFlightLoop_t fl_low{};
+    fl_low.structSize = sizeof(fl_low);
+    fl_low.phase = xplm_FlightLoop_Phase_BeforeFlightModel;
+    fl_low.callbackFunc = bridge_low_rate_update_cb;
+    fl_low.refcon = nullptr;
+    bridge_low_rate_loop = XPLMCreateFlightLoop(&fl_low);
+    XPLMScheduleFlightLoop(bridge_low_rate_loop, -1.0f, 1);
+
+    // Seed the buffer NOW — the flight loops are only scheduled, not yet fired.
     // Without this, the first client read returns all zeros, and the second read
     // returns real lat/lon/alt/speed values, which can trigger client-side
     // outlier/discontinuity detection and some clients may disconnects due to
     // these unexpected sudden changes.
-    bridge->update();
+    bridge->update_high_rate_offsets();
+    bridge->update_low_rate_offsets();
 
 #ifdef _WIN32
     ipc_ok = ipc_server->start(bridge.get());
@@ -232,6 +251,11 @@ PLUGIN_API void XPluginDisable()
     {
         XPLMDestroyFlightLoop(bridge_loop);
         bridge_loop = nullptr;
+    }
+    if (bridge_low_rate_loop)
+    {
+        XPLMDestroyFlightLoop(bridge_low_rate_loop);
+        bridge_low_rate_loop = nullptr;
     }
     update_status(false, false);
     XPLANE_LOG_INFO("OpenXPUIPC disabled");

@@ -2248,24 +2248,37 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
 //        nullptr,
 //        "Ambient wind Z [FS2002+] m/sec"},
 //
-//       // Ambient wind velocity [FS2002+] m/sec
-//       {0x3488, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3488");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "Ambient wind velocity [FS2002+] m/sec"},
+      // Ambient wind velocity [FS2002+] m/sec
+      {0x3488, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_speed_kts");
+         float _wsp = 0.0f;
+         if (r) {
+           XPLMGetDatavf(r, &_wsp, 1, 1); // Read element 1
+         }
+         put<double>(dst, static_cast<double>(_wsp) * 0.514444);
+       },
+       nullptr,
+       "Ambient wind velocity [FS2002+] m/sec"},
 //
-//       // Ambient wind direction [FS2002+]
-//       {0x3490, 8,
-//        // Read/Write: Unknown
-//        nullptr,
-//        nullptr,
-//        "Ambient wind direction [FS2002+]"},
+      // Ambient wind direction [FS2002+]
+      {0x3490, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_direction_degt");
+         float _wdir = 0.0f;
+         if (r) {
+           XPLMGetDatavf(r, &_wdir, 1, 1); // Read element 1
+         }
+         put<double>(dst, static_cast<double>(_wdir));
+       },
+       nullptr,
+       "Ambient wind direction [FS2002+]"},
 //
 //       // Ambient pressure [FS2002+]
 //       {0x3498, 8,
