@@ -192,7 +192,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_weather()
          (void)dref;
          static XPLMDataRef r = XPLMFindDataRef("sim/weather/aircraft/wind_now_speed_msc");
          float _wsp_msc = r ? XPLMGetDataf(r) : 0.0f;
-         put<int16_t>(dst, static_cast<int16_t>(_wsp_msc * 1.943844f)); // m/s -> kts
+         put<int16_t>(dst, static_cast<int16_t>(_wsp_msc * 1.943844f + 0.5f)); // m/s -> kts, rounded
        },
        nullptr,
        "Wind speed (kts)"},
