@@ -258,6 +258,50 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_unknown()
        nullptr,
        "Ground Altitude"},
 
+      // Transponder state — 0=Off, 1=Standby, 2=Test, 3=On, 4=Alt, 5=Ground.
+      // X-Plane's transponder_mode enum doesn't line up 1:1 (it has distinct
+      // mode-S/TA/RA states); map those to the closest FSUIPC equivalent.
+      {0x0B46, 1,
+       // Read/Write: Read/Write
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/radios/actuators/transponder_mode");
+         int xp_mode = r ? XPLMGetDatai(r) : 0;
+         uint8_t fsuipc_mode = 0;
+         switch (xp_mode)
+         {
+         case 0: fsuipc_mode = 0; break;  // off
+         case 1: fsuipc_mode = 1; break;  // standby
+         case 2: fsuipc_mode = 3; break;  // on (mode A)
+         case 3: fsuipc_mode = 4; break;  // alt (mode C)
+         case 4: fsuipc_mode = 2; break;  // test
+         case 5: fsuipc_mode = 5; break;  // ground (mode S)
+         default: fsuipc_mode = 4; break; // ta_only / ta_ra -> alt
+         }
+         put<uint8_t>(dst, fsuipc_mode);
+       },
+       [](const uint8_t *src, uint32_t, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/radios/actuators/transponder_mode");
+         if (!r)
+           return;
+         uint8_t fsuipc_mode = take<uint8_t>(src);
+         int xp_mode = 0;
+         switch (fsuipc_mode)
+         {
+         case 0: xp_mode = 0; break; // off
+         case 1: xp_mode = 1; break; // standby
+         case 2: xp_mode = 4; break; // test
+         case 3: xp_mode = 2; break; // on (mode A)
+         case 4: xp_mode = 3; break; // alt (mode C)
+         case 5: xp_mode = 5; break; // ground (mode S)
+         default: xp_mode = 0; break;
+         }
+         XPLMSetDatai(r, xp_mode);
+       },
+       "Transponder state"},
 //
 //       // Cloud type at aircraft
 //       {0x0E84, 1,
