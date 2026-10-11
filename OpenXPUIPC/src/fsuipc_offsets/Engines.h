@@ -189,18 +189,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 1 combustion flag"},
-//
-//       // ENG1 N2 — Percent*16384
-//       {0x0896, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0896");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "ENG1 N2"},
+
+      // ENG1 N2 — Percent*16384
+      {0x0896, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/engine/ENGN_N2_");
+         float n2 = 0.0f;
+         if (r)
+           XPLMGetDatavf(r, &n2, 0, 1);
+         put<int16_t>(dst, static_cast<int16_t>(n2 / 100.0f * 16384.0f));
+       },
+       nullptr,
+       "ENG1 N2"},
 
       // ENG1 N1 — Percent*16384
       {0x0898, 2,
