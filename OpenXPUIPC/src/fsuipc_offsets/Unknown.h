@@ -14,6 +14,13 @@
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
 
+// NOTE: 0x6D88-0x6DAF and 0x6F00-0x6FFF are documented by FSUIPC as
+// "reserved for XPUIPC use" scratch space, not real simulator state. Offsets
+// in those ranges (e.g. 0x6D8C, 0x6FFF) need no OffsetEntry: Bridge::read()/
+// write() already round-trip any offset through the shadow buffer, so they
+// behave as plain read/write storage for whichever client (e.g. a third-party
+// add-on) uses them privately.
+
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_unknown()
 {
   static const std::vector<OffsetEntry> table = {
