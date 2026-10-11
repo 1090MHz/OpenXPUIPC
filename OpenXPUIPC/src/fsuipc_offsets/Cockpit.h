@@ -16,6 +16,9 @@
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
 {
+  // Shared by the 0x3124 reader/writer below (no backing dataref exists).
+  static uint8_t s_electric_always_available = 1;
+
   static const std::vector<OffsetEntry> table = {
 
 
@@ -959,26 +962,23 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
        },
        nullptr,
        "Panel autobrake switch"},
-//
-//       // electric always available (FS2002 only) — Copy of FS2002's "electric
-//       // always available" flag, can be changed too.
-//       {0x3124, 1,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3124");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3124");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
-//        },
-//        "electric always available (FS2002 only)"},
+
+      // Electric always available (FS2002 only) — X-Plane has no matching
+      // capability flag, so this is plugin-local read/write state (defaults
+      // to available, matching typical FS2002 default).
+      {0x3124, 1,
+       // Read/Write: Read/Write
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<uint8_t>(dst, s_electric_always_available);
+       },
+       [](const uint8_t *src, uint32_t, DataRefCache &dref)
+       {
+         (void)dref;
+         s_electric_always_available = take<uint8_t>(src);
+       },
+       "electric always available (FS2002 only)"},
 
        // No smoking switch — 0 off, 1 on
        {0x341C, 1,
