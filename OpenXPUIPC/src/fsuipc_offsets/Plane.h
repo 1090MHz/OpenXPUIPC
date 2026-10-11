@@ -189,17 +189,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        nullptr,
 //        "Aircraft is tail dragger"},
 //
-//       // Has strobes
-//       {0x0794, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0794");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Has strobes"},
+      // Has strobes — X-Plane has no per-aircraft "strobes equipped" flag
+      // (unlike flaps/spoilers); strobe lights are effectively universal, so
+      // report fitted.
+      {0x0794, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<uint32_t>(dst, 1u);
+       },
+       nullptr,
+       "Has strobes"},
 //
 //       // Has toe brakes
 //       {0x079C, 4,
