@@ -238,6 +238,9 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_pos_attitude()
 
       // Altitude of aircraft — AGL. Can be written to move aircraft: in
       // FS2002 only in slew or pause states
+      // This 8-byte int64 also backs 0x0574 (high 32 bits = integer metres)
+      // for clients that read it as a separate 4-byte offset — no extra
+      // OffsetEntry needed, Bridge::read() copies straight from the buffer.
       {0x0570, 8,
        // Read/Write: Read/Write
        // high 32-bit integer (at 0574) and the fractional part is in the low
