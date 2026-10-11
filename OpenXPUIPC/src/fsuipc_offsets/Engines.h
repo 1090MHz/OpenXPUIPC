@@ -189,18 +189,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 1 combustion flag"},
-//
-//       // ENG1 N2 — Percent*16384
-//       {0x0896, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0896");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "ENG1 N2"},
+
+      // ENG1 N2 — Percent*16384
+      {0x0896, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/engine/ENGN_N2_");
+         float n2 = 0.0f;
+         if (r)
+           XPLMGetDatavf(r, &n2, 0, 1);
+         put<int16_t>(dst, static_cast<int16_t>(n2 / 100.0f * 16384.0f));
+       },
+       nullptr,
+       "ENG1 N2"},
 
       // ENG1 N1 — Percent*16384
       {0x0898, 2,
@@ -625,18 +628,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 2 combustion flag"},
-//
-//       // ENG2 N2 — Percent*16384
-//       {0x092E, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x092E");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "ENG2 N2"},
+
+      // ENG2 N2 — Percent*16384
+      {0x092E, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/engine/ENGN_N2_");
+         float n2 = 0.0f;
+         if (r)
+           XPLMGetDatavf(r, &n2, 1, 1);
+         put<int16_t>(dst, static_cast<int16_t>(n2 / 100.0f * 16384.0f));
+       },
+       nullptr,
+       "ENG2 N2"},
 
       // ENG2 N1 — Percent*16384
       {0x0930, 2,
@@ -1054,18 +1060,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 3 combustion flag"},
-//
-//       // ENG3 N2 — Percent*16384
-//       {0x09C6, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x09C6");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "ENG3 N2"},
+
+      // ENG3 N2 — Percent*16384
+      {0x09C6, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/engine/ENGN_N2_");
+         float n2 = 0.0f;
+         if (r)
+           XPLMGetDatavf(r, &n2, 2, 1);
+         put<int16_t>(dst, static_cast<int16_t>(n2 / 100.0f * 16384.0f));
+       },
+       nullptr,
+       "ENG3 N2"},
 
       // ENG3 N1 — Percent*16384
       {0x09C8, 2,
@@ -1439,18 +1448,21 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
        },
        nullptr,
        "Engine 4 combustion flag"},
-//
-//       // ENG4 N2 — Percent*16384
-//       {0x0A5E, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0A5E");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "ENG4 N2"},
+
+      // ENG4 N2 — Percent*16384
+      {0x0A5E, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/engine/ENGN_N2_");
+         float n2 = 0.0f;
+         if (r)
+           XPLMGetDatavf(r, &n2, 3, 1);
+         put<int16_t>(dst, static_cast<int16_t>(n2 / 100.0f * 16384.0f));
+       },
+       nullptr,
+       "ENG4 N2"},
 
       // ENG4 N1 — Percent*16384
       {0x0A60, 2,

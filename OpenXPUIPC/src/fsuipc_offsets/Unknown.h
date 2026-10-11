@@ -14,6 +14,13 @@
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
 
+// NOTE: 0x6D88-0x6DAF and 0x6F00-0x6FFF are documented by FSUIPC as
+// "reserved for XPUIPC use" scratch space, not real simulator state. Offsets
+// in those ranges (e.g. 0x6D8C, 0x6FFF) need no OffsetEntry: Bridge::read()/
+// write() already round-trip any offset through the shadow buffer, so they
+// behave as plain read/write storage for whichever client (e.g. a third-party
+// add-on) uses them privately.
+
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_unknown()
 {
   static const std::vector<OffsetEntry> table = {
@@ -232,18 +239,69 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_unknown()
 //        },
 //        "Fuel tank select"},
 //
-//       // Ground Altitude — Metres, *3.28084 for feet. See 0020 for more
-//       // accuracy
-//       {0x0B4C, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0B4C");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Ground Altitude"},
+      // Ground Altitude — Metres, *3.28084 for feet. See 0020 for more
+      // accuracy. Our local FSUIPC SDK scrape says 2 bytes, but the live
+      // IPC client reads 4, and projectmagenta.com/all-fsuipc-offsets/
+      // (checked 2026-10-10) also lists this as 4 bytes — stored as int32
+      // to match.
+      {0x0B4C, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_elev = XPLMFindDataRef("sim/flightmodel/position/elevation");
+         static XPLMDataRef r_agl = XPLMFindDataRef("sim/flightmodel/position/y_agl");
+         double elev = r_elev ? XPLMGetDatad(r_elev) : 0.0;
+         float agl = r_agl ? XPLMGetDataf(r_agl) : 0.0f;
+         put<int32_t>(dst, static_cast<int32_t>(elev - agl));
+       },
+       nullptr,
+       "Ground Altitude"},
+
+      // Transponder state — 0=Off, 1=Standby, 2=Test, 3=On, 4=Alt, 5=Ground.
+      // X-Plane's transponder_mode enum doesn't line up 1:1 (it has distinct
+      // mode-S/TA/RA states); map those to the closest FSUIPC equivalent.
+      {0x0B46, 1,
+       // Read/Write: Read/Write
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/radios/actuators/transponder_mode");
+         int xp_mode = r ? XPLMGetDatai(r) : 0;
+         uint8_t fsuipc_mode = 0;
+         switch (xp_mode)
+         {
+         case 0: fsuipc_mode = 0; break;  // off
+         case 1: fsuipc_mode = 1; break;  // standby
+         case 2: fsuipc_mode = 3; break;  // on (mode A)
+         case 3: fsuipc_mode = 4; break;  // alt (mode C)
+         case 4: fsuipc_mode = 2; break;  // test
+         case 5: fsuipc_mode = 5; break;  // ground (mode S)
+         default: fsuipc_mode = 4; break; // ta_only / ta_ra -> alt
+         }
+         put<uint8_t>(dst, fsuipc_mode);
+       },
+       [](const uint8_t *src, uint32_t, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/radios/actuators/transponder_mode");
+         if (!r)
+           return;
+         uint8_t fsuipc_mode = take<uint8_t>(src);
+         int xp_mode = 0;
+         switch (fsuipc_mode)
+         {
+         case 0: xp_mode = 0; break; // off
+         case 1: xp_mode = 1; break; // standby
+         case 2: xp_mode = 4; break; // test
+         case 3: xp_mode = 2; break; // on (mode A)
+         case 4: xp_mode = 3; break; // alt (mode C)
+         case 5: xp_mode = 5; break; // ground (mode S)
+         default: xp_mode = 0; break;
+         }
+         XPLMSetDatai(r, xp_mode);
+       },
+       "Transponder state"},
 //
 //       // Cloud type at aircraft
 //       {0x0E84, 1,

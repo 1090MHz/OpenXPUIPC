@@ -89,18 +89,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        },
 //        "Smoke System control"},
 //
-//       // Gear type (<= FS2000) — 0=Gear is fixed, 1=Gear is reractable,
-//       // 2=Gear is slides, ...?
-//       {0x060C, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x060C");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Gear type (<= FS2000)"},
+      // Gear type (<= FS2000) — 0=fixed, 1=retractable, 2=slides. X-Plane
+      // only exposes a retractable boolean, so "slides" is never reported.
+      {0x060C, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/gear/acf_gear_retract");
+         put<uint16_t>(dst, static_cast<uint16_t>(r && XPLMGetDatai(r) ? 1 : 0));
+       },
+       nullptr,
+       "Gear type (<= FS2000)"},
 //
 //       // Retractable gear
 //       {0x060E, 1,
@@ -140,17 +140,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        nullptr,
 //        "Retractable right float extension"},
 //
-//       // Flap Fitted — 0=Has no flaps. 1=Has flaps
-//       {0x0778, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0778");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Flap Fitted"},
+      // Flap Fitted — 0=Has no flaps. 1=Has flaps
+      {0x0778, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/parts/acf_flapEQ");
+         put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
+       },
+       nullptr,
+       "Flap Fitted"},
 //
 //       // Has stall horn — not FS2004?
 //       {0x077C, 4,
@@ -164,17 +164,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        nullptr,
 //        "Has stall horn"},
 //
-//       // Has spoilers
-//       {0x078C, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x078C");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Has spoilers"},
+      // Has spoilers — FSUIPC's "spoilers" maps to X-Plane's speed-brake
+      // equipped flag.
+      {0x078C, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/parts/acf_sbrkEQ");
+         put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
+       },
+       nullptr,
+       "Has spoilers"},
 //
 //       // Aircraft is tail dragger
 //       {0x0790, 4,
@@ -188,17 +189,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        nullptr,
 //        "Aircraft is tail dragger"},
 //
-//       // Has strobes
-//       {0x0794, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0794");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Has strobes"},
+      // Has strobes — X-Plane has no per-aircraft "strobes equipped" flag
+      // (unlike flaps/spoilers); strobe lights are effectively universal, so
+      // report fitted.
+      {0x0794, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<uint32_t>(dst, 1u);
+       },
+       nullptr,
+       "Has strobes"},
 //
 //       // Has toe brakes
 //       {0x079C, 4,
