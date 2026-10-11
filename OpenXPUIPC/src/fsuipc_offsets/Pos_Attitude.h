@@ -320,6 +320,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_pos_attitude()
 //        },
 //        nullptr,
 //        "LLAPBH updated time"},
+
+      // Indicated altitude, calibrated to current sea level pressure — feet
+      {0x0590, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/altitude_ft_pilot");
+         put<int32_t>(dst, static_cast<int32_t>(r ? XPLMGetDataf(r) : 0.0f));
+       },
+       nullptr,
+       "Indicated altitude (calibrated)"},
 //
 //       // Viewpoint Latitude — -ve for South, +ve for North. See expression
 //       // for conversion.
