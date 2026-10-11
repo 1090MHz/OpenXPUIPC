@@ -239,18 +239,25 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_unknown()
 //        },
 //        "Fuel tank select"},
 //
-//       // Ground Altitude — Metres, *3.28084 for feet. See 0020 for more
-//       // accuracy
-//       {0x0B4C, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0B4C");
-//          put<int16_t>(dst, static_cast<int16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Ground Altitude"},
+      // Ground Altitude — Metres, *3.28084 for feet. See 0020 for more
+      // accuracy. Our local FSUIPC SDK scrape says 2 bytes, but the live
+      // IPC client reads 4, and projectmagenta.com/all-fsuipc-offsets/
+      // (checked 2026-10-10) also lists this as 4 bytes — stored as int32
+      // to match.
+      {0x0B4C, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_elev = XPLMFindDataRef("sim/flightmodel/position/elevation");
+         static XPLMDataRef r_agl = XPLMFindDataRef("sim/flightmodel/position/y_agl");
+         double elev = r_elev ? XPLMGetDatad(r_elev) : 0.0;
+         float agl = r_agl ? XPLMGetDataf(r_agl) : 0.0f;
+         put<int32_t>(dst, static_cast<int32_t>(elev - agl));
+       },
+       nullptr,
+       "Ground Altitude"},
+
 //
 //       // Cloud type at aircraft
 //       {0x0E84, 1,
