@@ -140,17 +140,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        nullptr,
 //        "Retractable right float extension"},
 //
-//       // Flap Fitted — 0=Has no flaps. 1=Has flaps
-//       {0x0778, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0778");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Flap Fitted"},
+      // Flap Fitted — 0=Has no flaps. 1=Has flaps
+      {0x0778, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/parts/acf_flapEQ");
+         put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
+       },
+       nullptr,
+       "Flap Fitted"},
 //
 //       // Has stall horn — not FS2004?
 //       {0x077C, 4,
