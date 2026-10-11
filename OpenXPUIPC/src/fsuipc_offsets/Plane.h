@@ -89,18 +89,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        },
 //        "Smoke System control"},
 //
-//       // Gear type (<= FS2000) — 0=Gear is fixed, 1=Gear is reractable,
-//       // 2=Gear is slides, ...?
-//       {0x060C, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x060C");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Gear type (<= FS2000)"},
+      // Gear type (<= FS2000) — 0=fixed, 1=retractable, 2=slides. X-Plane
+      // only exposes a retractable boolean, so "slides" is never reported.
+      {0x060C, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/gear/acf_gear_retract");
+         put<uint16_t>(dst, static_cast<uint16_t>(r && XPLMGetDatai(r) ? 1 : 0));
+       },
+       nullptr,
+       "Gear type (<= FS2000)"},
 //
 //       // Retractable gear
 //       {0x060E, 1,
