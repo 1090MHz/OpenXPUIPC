@@ -29,6 +29,9 @@ namespace xpuipc {
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 {
+  // Shared by the 0x05DC reader/writer below (no backing dataref exists).
+  static uint16_t s_slew_mode = 0;
+
   static const std::vector<OffsetEntry> table = {
 
 //
@@ -592,24 +595,25 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
 //        nullptr,
 //        "Smoke system available (<= FS2000)"},
 //
-//       // Slew Mode — 0=not slew mode, 1=slew mode
-//       {0x05DC, 2,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x05DC");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x05DC");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint16_t>(src)));
-//        },
-//        "Slew Mode"},
+      // Slew Mode — 0=not slew mode, 1=slew mode. X-Plane has no slew-mode
+      // concept (removed after FS9-era sims), so this is plugin-local
+      // read/write state rather than a real dataref. Corroborated by the
+      // FFB-Bridge dev's notes (x-plane.org forums, topic 349617): "Slew
+      // mode" there is handled as an MSFS-only signal, with X-Plane falling
+      // back to its existing unsupported/zero behaviour.
+      {0x05DC, 2,
+       // Read/Write: Read/Write
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         put<uint16_t>(dst, s_slew_mode);
+       },
+       [](const uint8_t *src, uint32_t, DataRefCache &dref)
+       {
+         (void)dref;
+         s_slew_mode = take<uint16_t>(src);
+       },
+       "Slew Mode"},
 //
 //       // Slew control — Write non-zero value here at same time as changing
 //       // 05DC above, and the Slew mode change includes the swapping of the
