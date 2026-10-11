@@ -164,17 +164,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
 //        nullptr,
 //        "Has stall horn"},
 //
-//       // Has spoilers
-//       {0x078C, 4,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x078C");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Has spoilers"},
+      // Has spoilers — FSUIPC's "spoilers" maps to X-Plane's speed-brake
+      // equipped flag.
+      {0x078C, 4,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/parts/acf_sbrkEQ");
+         put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
+       },
+       nullptr,
+       "Has spoilers"},
 //
 //       // Aircraft is tail dragger
 //       {0x0790, 4,
