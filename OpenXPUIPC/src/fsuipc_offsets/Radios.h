@@ -1898,17 +1898,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
 //        "FS2004 GPS Zulu time in secs since midnight"},
 //
 //       // FS2004 GPS Latitude in degrees — -ve = South
-//       {0x6010, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x6010");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "FS2004 GPS Latitude in degrees"},
-//
+      {0x6010, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/position/latitude");
+         put<double>(dst, r ? XPLMGetDatad(r) : 0.0);
+       },
+       nullptr,
+       "FS2004 GPS Latitude in degrees"},
+
 //       // FS2004 GPS Longitude in degrees — -ve = West
 //       {0x6018, 8,
 //        // Read/Write: Read (only)
