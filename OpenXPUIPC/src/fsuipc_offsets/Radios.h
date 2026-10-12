@@ -1921,17 +1921,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
        nullptr,
        "FS2004 GPS Longitude in degrees"},
 
-//       // FS2004 GPS Altitude — metres
-//       {0x6020, 8,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x6020");
-//          put<double>(dst, static_cast<double>(r ? XPLMGetDatad(r) : 0.0));
-//        },
-//        nullptr,
-//        "FS2004 GPS Altitude"},
+      // FS2004 GPS Altitude — metres
+      {0x6020, 8,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/flightmodel/position/elevation");
+         put<double>(dst, r ? XPLMGetDatad(r) : 0.0);
+       },
+       nullptr,
+       "FS2004 GPS Altitude"},
 //
 //       // FS2004 GPS Mag Var — radians (subtract from True for Mag headings)
 //       {0x6028, 8,
