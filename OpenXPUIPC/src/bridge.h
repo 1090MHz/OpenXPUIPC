@@ -147,7 +147,17 @@ public:
     // Reads from the shadow buffer — no XPLM calls, safe from wndproc.
     void log_range(uint32_t offset, uint32_t size) const {
         for (const auto& [off, entry] : index_) {
-            if (off >= offset && off + entry->size <= offset + size) {
+            const bool inside = off >= offset && off + entry->size <= offset + size;
+            const bool overlaps = off < offset + size && off + entry->size > offset;
+            if (overlaps && !inside) {
+                // Partial overlap: show the requested bytes that fall within this entry.
+                const uint32_t lo = off > offset ? off : offset;
+                const uint32_t hi = (off + entry->size < offset + size) ? off + entry->size : offset + size;
+                uint64_t v = 0;
+                std::memcpy(&v, buf_ + lo, hi - lo > 8 ? 8 : hi - lo);
+                XPLANE_LOG_TRACE("  [0x{:04X}..0x{:04X}] part of {} @0x{:04X} = 0x{:X}",
+                    lo, hi - 1, entry->desc, off, v);
+            } else if (inside) {
                 if (entry->size == 8) {
                     int64_t iv; std::memcpy(&iv, buf_ + off, 8);
                     double  dv; std::memcpy(&dv, buf_ + off, 8);
