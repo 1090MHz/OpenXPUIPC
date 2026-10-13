@@ -1779,18 +1779,26 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
 //
 //       // Radio swap controls (FS2002+) — Write 1 to specific bits to swap
 //       // use/standby frequencies:
-//       {0x3123, 1,
-//        // Read/Write: Write (only)
-//        nullptr,
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x3123");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint8_t>(src)));
-//        },
-//        "Radio swap controls (FS2002+)"},
+      {0x3123, 1,
+       // Read/Write: Write (only)
+       nullptr,
+       [](const uint8_t *src, uint32_t, DataRefCache &dref)
+       {
+         (void)dref;
+         static const char *const cmds[4] = {
+             "sim/radios/com1_standy_flip", "sim/radios/com2_standy_flip",
+             "sim/radios/nav1_standy_flip", "sim/radios/nav2_standy_flip"};
+         const uint8_t v = take<uint8_t>(src);
+         // Bit 3=COM1, 2=COM2, 1=NAV1, 0=NAV2
+         for (int i = 0; i < 4; ++i)
+         {
+           if (!((v >> (3 - i)) & 1))
+             continue;
+           if (XPLMCommandRef c = XPLMFindCommand(cmds[i]))
+             XPLMCommandOnce(c);
+         }
+       },
+       "Radio swap controls (FS2002+)"},
 
       // Navaid status flags — Bits set as follows: (bit 0 = Least SDig) 1 =
       // good NAV1 signal 2 = good NAV2 signal 3 = good ADF signal 4 = NAV1
