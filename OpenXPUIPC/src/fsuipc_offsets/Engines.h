@@ -43,16 +43,40 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_engines()
 //
 //       // Engine type — 0=Piston (and some Helos using the pistom model),
 //       // 1=Jet, 2=Sailplane, 3=Helo, 4=Rocket, 5=Turboprop
-//       {0x0609, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0609");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Engine type"},
+      {0x0609, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r_glider = XPLMFindDataRef("sim/aircraft2/metadata/is_glider");
+         static XPLMDataRef r_helo = XPLMFindDataRef("sim/aircraft2/metadata/is_helicopter");
+         static XPLMDataRef r_type = XPLMFindDataRef("sim/aircraft/prop/acf_en_type");
+         uint8_t t = 0;
+         if (r_glider && XPLMGetDatai(r_glider))
+         {
+           t = 2;
+         }
+         else if (r_helo && XPLMGetDatai(r_helo))
+         {
+           t = 3;
+         }
+         else
+         {
+           int en = 0;
+           if (r_type)
+             XPLMGetDatavi(r_type, &en, 0, 1);
+           // X-Plane: 5/7=jet, 6=rocket, 9/10=turboprop; others piston/electric
+           if (en == 5 || en == 7)
+             t = 1;
+           else if (en == 6)
+             t = 4;
+           else if (en == 9 || en == 10)
+             t = 5;
+         }
+         put<uint8_t>(dst, t);
+       },
+       nullptr,
+       "Engine type"},
 //
       // Has mixture control
       {0x0780, 4,
