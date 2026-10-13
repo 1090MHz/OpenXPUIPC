@@ -291,27 +291,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
            XPLMSetDatai(r_h28, conv::from_bcd(take<int16_t>(src)));
        },
        "Transponder code"},
-//
-//       // ADF Extended Freq — Hi byte provides 1,000's digit, low byte
-//       // provides fraction
-//       {0x0356, 2,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0356");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0356");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint16_t>(src)));
-//        },
-//        "ADF Extended Freq"},
-//
+
+      // ADF Extended Freq — Hi byte provides 1,000's digit, low byte
+      // provides fraction
+      {0x0356, 2,
+       // Read/Write: Read/Write
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit/radios/adf1_freq_hz");
+         const int khz = r ? XPLMGetDatai(r) : 0;
+         // X-Plane ADF frequency is whole kHz, so the fraction byte is always 0
+         put<uint16_t>(dst, static_cast<uint16_t>((khz / 1000) << 8));
+       },
+       [](const uint8_t *src, uint32_t, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit/radios/adf1_freq_hz");
+         if (r)
+           XPLMSetDatai(r, ((take<uint16_t>(src) >> 8) & 0xFF) * 1000 + XPLMGetDatai(r) % 1000);
+       },
+       "ADF Extended Freq"},
+
 //       // NAV1/2 Select — 256=Nav1, 512=Nav2
 //       {0x0374, 2,
 //        // Read/Write: Read/Write
