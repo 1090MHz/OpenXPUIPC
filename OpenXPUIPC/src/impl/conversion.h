@@ -65,6 +65,9 @@ inline float wrap_heading(float hdg) {
 }
 
 inline int16_t to_bcd(int value) {
+    if (value < 0 || value > 9999)
+        return 0;
+
     int d1 = (value / 1000) % 10;
     int d2 = (value / 100)  % 10;
     int d3 = (value / 10)   % 10;
