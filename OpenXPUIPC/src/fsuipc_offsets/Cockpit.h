@@ -185,9 +185,12 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/turn_rate_heading_deg_pilot");
-         float rate = r ? XPLMGetDataf(r) : 0.0f;
-         put<int16_t>(dst, static_cast<int16_t>(rate * 512.0f / 3.0f));
+         static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/turn_rate_roll_deg_pilot");
+         float deflection = r ? XPLMGetDataf(r) : 0.0f;
+         float scaled = deflection * 512.0f / 20.0f;
+         scaled = (std::max)(-32768.0f, (std::min)(32767.0f, scaled));
+         int16_t value = static_cast<int16_t>(scaled >= 0.0f ? scaled + 0.5f : scaled - 0.5f);
+         put<int16_t>(dst, value);
        },
        nullptr,
        "Turn rate (0=level, +-512=2min turn)"},
@@ -214,10 +217,9 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
         [](uint8_t *dst, DataRefCache &dref)
         {
           (void)dref;
-          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/turn_rate_heading_deg_pilot");
-          float rate = r ? XPLMGetDataf(r) : 0.0f;
-          // Return as float directly (same source as 037C)
-          put<float>(dst, rate);
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/turn_rate_roll_deg_pilot");
+          float deflection = r ? XPLMGetDataf(r) : 0.0f;
+          put<float>(dst, deflection * 3.0f / 20.0f);
         },
         nullptr,
         "Turn rate (precise)"},
