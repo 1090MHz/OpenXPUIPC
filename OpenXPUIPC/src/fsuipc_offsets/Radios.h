@@ -14,6 +14,7 @@
 
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
 #include "impl/nav_station.h"  // find_nav_station(), NavStation
+#include <XPlaneUtilities/XPlaneLog.h>
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
 {
@@ -234,15 +235,25 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
        },
        "COM1 frequency (BCD)"},
 
-      // NAV1 Freq — Frequency show as BCD (Binary Coded Decimal), however
-      // the prefixed "1" is removed
+      // NAV frequencies are in 10 kHz units; the BCD offsets omit the leading
+      // "1" from the 10800-11795 range.
       {0x0350, 2,
        // Read/Write: Read/Write
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
          static XPLMDataRef r_h23 = XPLMFindDataRef("sim/cockpit/radios/nav1_freq_hz");
-         put<int16_t>(dst, conv::to_bcd((r_h23 ? XPLMGetDatai(r_h23) : 0) - 10000));
+         const int frequency = r_h23 ? XPLMGetDatai(r_h23) : 0;
+         const bool valid_frequency = r_h23 && frequency >= 10800 && frequency <= 11795;
+         static bool logged_invalid_frequency = false;
+         if (!valid_frequency && !logged_invalid_frequency) {
+           XPlaneLog::warn(std::string("NAV1 frequency dataref ") +
+                           (r_h23 ? "out-of-range (raw=" : "not found (raw=") +
+                           std::to_string(frequency) + "): returning zero BCD");
+           logged_invalid_frequency = true;
+         }
+         const int bcd_frequency = valid_frequency ? frequency - 10000 : 0;
+         put<int16_t>(dst, conv::to_bcd(bcd_frequency));
        },
        [](const uint8_t *src, uint32_t, DataRefCache &dref)
        {
@@ -261,7 +272,17 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
        {
          (void)dref;
          static XPLMDataRef r_h25 = XPLMFindDataRef("sim/cockpit/radios/nav2_freq_hz");
-         put<int16_t>(dst, conv::to_bcd((r_h25 ? XPLMGetDatai(r_h25) : 0) - 10000));
+         const int frequency = r_h25 ? XPLMGetDatai(r_h25) : 0;
+         const bool valid_frequency = r_h25 && frequency >= 10800 && frequency <= 11795;
+         static bool logged_invalid_frequency = false;
+         if (!valid_frequency && !logged_invalid_frequency) {
+           XPlaneLog::warn(std::string("NAV2 frequency dataref ") +
+                           (r_h25 ? "out-of-range (raw=" : "not found (raw=") +
+                           std::to_string(frequency) + "): returning zero BCD");
+           logged_invalid_frequency = true;
+         }
+         const int bcd_frequency = valid_frequency ? frequency - 10000 : 0;
+         put<int16_t>(dst, conv::to_bcd(bcd_frequency));
        },
        [](const uint8_t *src, uint32_t, DataRefCache &dref)
        {
