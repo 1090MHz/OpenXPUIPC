@@ -1284,24 +1284,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_radios()
 //        nullptr,
 //        "ADF2 Elevation (FSX)"},
 //
-//       // GPS/NAV switch [FS2000+] — =0 NAV, =1 GPS
-//       {0x132C, 4,
-//        // Read/Write: Read/Write
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x132C");
-//          put<uint32_t>(dst, static_cast<uint32_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        [](const uint8_t *src, uint32_t sz, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          (void)sz;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x132C");
-//          if (r)
-//            XPLMSetDatai(r, static_cast<int>(take<uint32_t>(src)));
-//        },
-//        "GPS/NAV switch [FS2000+]"},
+      // GPS/NAV switch [FS2000+] — =0 NAV, =1 GPS
+      {0x132C, 4,
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef source_ref = XPLMFindDataRef("sim/cockpit2/radios/actuators/HSI_source_select_pilot");
+         const int source = source_ref ? XPLMGetDatai(source_ref) : 0;
+         put<uint32_t>(dst, (source == 2 || source == 3) ? 1u : 0u);
+       },
+       [](const uint8_t *src, uint32_t size, DataRefCache &dref)
+       {
+         (void)dref;
+         if (size < sizeof(uint32_t))
+           return;
+         const uint32_t selection = take<uint32_t>(src);
+         if (selection > 1)
+           return;
+         static XPLMDataRef source_ref = XPLMFindDataRef("sim/cockpit2/radios/actuators/HSI_source_select_pilot");
+         if (source_ref)
+           XPLMSetDatai(source_ref, selection == 1 ? 2 : 0);
+       },
+       "GPS/NAV switch [FS2000+]"},
 
       // VOR1 Localiser needle
       {0x2AAC, 4,
