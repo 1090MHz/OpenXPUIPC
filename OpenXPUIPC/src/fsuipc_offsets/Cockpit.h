@@ -217,10 +217,9 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_cockpit()
         [](uint8_t *dst, DataRefCache &dref)
         {
           (void)dref;
-          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/turn_rate_heading_deg_pilot");
-          float rate = r ? XPLMGetDataf(r) : 0.0f;
-          // Return as float directly (same source as 037C)
-          put<float>(dst, rate);
+          static XPLMDataRef r = XPLMFindDataRef("sim/cockpit2/gauges/indicators/turn_rate_roll_deg_pilot");
+          float deflection = r ? XPLMGetDataf(r) : 0.0f;
+          put<float>(dst, deflection * 3.0f / 20.0f);
         },
         nullptr,
         "Turn rate (precise)"},
