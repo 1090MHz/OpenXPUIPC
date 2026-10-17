@@ -2228,7 +2228,7 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_simulation()
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &)
        {
-         put<int32_t>(dst, 0x50000006);
+         put<int32_t>(dst, 0x50000008);
        },
        nullptr,
        "FS version"},
