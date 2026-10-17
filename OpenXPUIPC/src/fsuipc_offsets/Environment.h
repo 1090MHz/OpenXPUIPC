@@ -413,16 +413,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
 //        "ICAO id of nearest Wx station"},
 //
 //       // Time of Day Indicator — 1=Day, 2=Dusk/Dawn, 4=Night
-//       {0x115E, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x115E");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Time of Day Indicator"},
+      {0x115E, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/graphics/scenery/sun_pitch_degrees");
+         const float pitch = r ? XPLMGetDataf(r) : 90.0f;
+         // Day above horizon, dusk/dawn within civil twilight (-6 deg), else night
+         put<uint8_t>(dst, pitch > 0.0f ? 1 : (pitch > -6.0f ? 2 : 4));
+       },
+       nullptr,
+       "Time of Day Indicator"},
 //
 //       // Ground scenery shadows — 0=off, 1=on
 //       {0x11A2, 1,
