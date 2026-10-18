@@ -6,6 +6,7 @@
 //
 #pragma once
 
+#include "fsuipc_offsets/AI_Traffic_TCAS_tables.h"
 #include "fsuipc_offsets/Autopilot.h"
 #include "fsuipc_offsets/Cockpit.h"
 #include "fsuipc_offsets/Controls.h"
@@ -22,6 +23,8 @@
 
 template<typename BridgeType>
 inline void register_fsuipc_offset_tables(BridgeType& offset_bridge) {
+    // AI_Traffic_TCAS_tables.h
+    offset_bridge.register_table(fsuipc_offset_table_ai_traffic_tcas_tables());
     // Autopilot.h
     offset_bridge.register_table(fsuipc_offset_table_autopilot());
     // Cockpit.h
