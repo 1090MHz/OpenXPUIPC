@@ -139,8 +139,19 @@ public:
     }
 
     const char* desc(uint32_t offset) const {
-        auto* e = find(offset);
-        return (e && e->desc) ? e->desc : "";
+        if (const auto* entry = find(offset))
+            return entry->desc ? entry->desc : "";
+
+        // Manually maintained logging aliases for partial reads of implemented entries.
+        // Add cases when logs reveal missing descriptions, after confirming the data
+        // is already provided by a registered entry. These aliases add no handlers.
+        switch (offset) {
+        case 0x0574:
+            // Upper 32 bits of the 8-byte altitude entry at 0x0570.
+            return "Altitude (integer metres)";
+        default:
+            return "";
+        }
     }
 
     // Dump all known offset values within [offset, offset+size) at TRACE level.
