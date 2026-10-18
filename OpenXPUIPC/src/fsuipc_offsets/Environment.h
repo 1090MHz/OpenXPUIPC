@@ -12,6 +12,8 @@
 //
 #pragma once
 
+#include <ctime>
+
 #include "offset_types.h" // OffsetEntry, put<>, take<>, DataRefCache, conv::
 
 inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
@@ -500,18 +502,9 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
 //        },
 //        nullptr,
 //        "Surface condition (FS2002)"},
-//
-//       // Slot offset of nearest ground AI traffic
-//       {0xE07E, 2,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0xE07E");
-//          put<uint16_t>(dst, static_cast<uint16_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Slot offset of nearest ground AI traffic"},
+
+  // Slot offset of nearest ground AI traffic (0xE07E, 2 bytes) moved to
+  // fsuipc_offsets/AI_Traffic_TCAS_tables.h.
 
   }; // end table
   return table;
