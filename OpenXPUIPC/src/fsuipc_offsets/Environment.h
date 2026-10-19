@@ -118,15 +118,20 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
        [](uint8_t *dst, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h7 = XPLMFindDataRef("sim/time/local_date_days");
-         put<int16_t>(dst, static_cast<int16_t>((r_h7 ? XPLMGetDatai(r_h7) : 0)));
+         // X-Plane counts days since Jan 1 from 0; FSUIPC counts from 1. Zulu date dataref needs XP 12.4.1+.
+         static XPLMDataRef r_z = XPLMFindDataRef("sim/time/zulu_date_days");
+         static XPLMDataRef r_l = XPLMFindDataRef("sim/time/local_date_days");
+         XPLMDataRef r = r_z ? r_z : r_l;
+         put<int16_t>(dst, static_cast<int16_t>((r ? XPLMGetDatai(r) : 0) + 1));
        },
        [](const uint8_t *src, uint32_t, DataRefCache &dref)
        {
          (void)dref;
-         static XPLMDataRef r_h8 = XPLMFindDataRef("sim/time/local_date_days");
-         if (r_h8)
-           XPLMSetDatai(r_h8, take<int16_t>(src));
+         static XPLMDataRef r_z = XPLMFindDataRef("sim/time/zulu_date_days");
+         static XPLMDataRef r_l = XPLMFindDataRef("sim/time/local_date_days");
+         XPLMDataRef r = r_z ? r_z : r_l;
+         if (r)
+           XPLMSetDatai(r, take<int16_t>(src) - 1);
        },
        "Day of year"},
 
