@@ -201,18 +201,25 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
        },
        nullptr,
        "Local month of year"},
-//
-//       // Local day of month (FSX only)
-//       {0x0245, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0245");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Local day of month (FSX only)"},
+
+      // Local day of month (FSX only)
+      {0x0245, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+         static XPLMDataRef r_cd = XPLMFindDataRef("sim/cockpit2/clock_timer/current_day");
+         if (r_cd)
+         {
+           put<uint8_t>(dst, static_cast<uint8_t>(XPLMGetDatai(r_cd)));
+           return;
+         }
+         std::time_t t = std::time(nullptr);
+         std::tm tm = {};
+         localtime_s(&tm, &t);
+         put<uint8_t>(dst, static_cast<uint8_t>(tm.tm_mday));
+       },
+       nullptr,
+       "Local day of month (FSX only)"},
 
       // Time Zone offset to Zulu (minutes) — Determines local time from Zulu
       // and aircraft position (+ve=behind Zulu, -ve=ahead)
