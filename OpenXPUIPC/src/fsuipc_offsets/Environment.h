@@ -148,6 +148,12 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
        // Read/Write: Read (only)
        [](uint8_t *dst, DataRefCache &)
        {
+         static XPLMDataRef r_zm = XPLMFindDataRef("sim/cockpit2/clock_timer/zulu_month");
+         if (r_zm)
+         {
+           put<uint8_t>(dst, static_cast<uint8_t>(XPLMGetDatai(r_zm)));
+           return;
+         }
          std::time_t t = std::time(nullptr);
          std::tm tm = {};
          gmtime_s(&tm, &t);
