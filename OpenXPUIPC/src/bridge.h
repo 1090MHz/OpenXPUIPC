@@ -19,6 +19,7 @@
 #include <fsuipc_offsets/fsuipc_offset_table.h>
 #include "cfg_offset_table.h"
 #include "impl/sim_state.h"
+#include "weather_read.h"
 
 // Forward declaration for FSUIPC text display message buffer
 namespace xpuipc { extern char tts_message_buffer[128]; }
@@ -61,6 +62,9 @@ public:
                                 static_cast<uint32_t>(pw.data.size()), dr_);
         }
         pending_writes_.clear();
+
+        // 1b. Service any pending weather-read request (0xCC04 signature)
+        weather_read_.process(buf_);
 
         // 2. Refresh high-rate entries into buf_ via pre-built flat list
         for (const auto& [off, entry] : read_list_high_)
@@ -121,6 +125,8 @@ public:
             xpuipc::tts_message_buffer[copy_len] = '\0';  // Ensure null termination
         }
 
+        weather_read_.note_write(offset, size, buf_);
+
         const OffsetEntry* entry = find(offset);
         if (entry && entry->write) {
             pending_writes_.push_back({entry, {src, src + size}});
@@ -139,8 +145,27 @@ public:
     }
 
     const char* desc(uint32_t offset) const {
-        auto* e = find(offset);
-        return (e && e->desc) ? e->desc : "";
+        if (const auto* entry = find(offset))
+            return entry->desc ? entry->desc : "";
+
+        // Manually maintained logging aliases for partial reads of implemented entries.
+        // Add cases when logs reveal missing descriptions, after confirming the data
+        // is already provided by a registered entry. These aliases add no handlers.
+        switch (offset) {
+        case 0x0574:
+            // Upper 32 bits of the 8-byte altitude entry at 0x0570.
+            return "Altitude (integer metres)";
+        // Weather-read protocol, handled by WeatherReadService.
+        case 0xB800: return "METAR string being read (FSX)";
+        case 0xCC00: return "New weather read block";
+        case 0xCC04: return "Signature for weather reading (FS2004)";
+        case 0xCC08: return "ICAO for weather reading (FS2004)";
+        case 0xCC10: return "Weather read Latitude";
+        case 0xCC18: return "Weather read Longitude";
+        case 0xCC24: return "Weather read timestamp";
+        default:
+            return "";
+        }
     }
 
     // Dump all known offset values within [offset, offset+size) at TRACE level.
@@ -180,6 +205,7 @@ private:
     };
 
     DataRefCache dr_;
+    WeatherReadService weather_read_;
     uint8_t buf_[0x10000]{};  // 64 KB shadow buffer, zero-initialized
     std::unordered_map<uint32_t, const OffsetEntry*> index_;
     std::vector<std::pair<uint32_t, const OffsetEntry*>> read_list_high_; // readable entries refreshed at high rate
