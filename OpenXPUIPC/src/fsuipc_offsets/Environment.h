@@ -83,17 +83,34 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
        nullptr,
        "Zulu minutes"},
 //
-//       // Zulu day of month (FSX only) — Counts from 1, not 0
-//       {0x023D, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x023D");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Zulu day of month (FSX only)"},
+      // Zulu day of month (FSX only) — Counts from 1, not 0
+      {0x023D, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+         static XPLMDataRef r_zd = XPLMFindDataRef("sim/cockpit2/clock_timer/zulu_day");
+         if (r_zd)
+         {
+           put<uint8_t>(dst, static_cast<uint8_t>(XPLMGetDatai(r_zd)));
+           return;
+         }
+         // Pre-12.4.1: derive from the Zulu day of year plus the PC year.
+         static XPLMDataRef r_zy = XPLMFindDataRef("sim/time/zulu_date_days");
+         static XPLMDataRef r_ly = XPLMFindDataRef("sim/time/local_date_days");
+         XPLMDataRef r = r_zy ? r_zy : r_ly;
+         std::time_t now = std::time(nullptr);
+         std::tm tm = {};
+         gmtime_s(&tm, &now);
+         tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
+         tm.tm_mon = 0;
+         tm.tm_mday = 1 + (r ? XPLMGetDatai(r) : 0);
+         std::time_t t = _mkgmtime(&tm);
+         std::tm out = {};
+         gmtime_s(&out, &t);
+         put<uint8_t>(dst, static_cast<uint8_t>(out.tm_mday));
+       },
+       nullptr,
+       "Zulu day of month (FSX only)"},
 
       // Day of Year — Counts from 1, not 0
       {0x023E, 2,
