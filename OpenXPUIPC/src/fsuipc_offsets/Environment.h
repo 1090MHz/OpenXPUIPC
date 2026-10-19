@@ -166,18 +166,28 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_environment()
        },
        nullptr,
        "Zulu month of year"},
-//
-//       // Zulu day of week (FSX only)
-//       {0x0243, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x0243");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Zulu day of week (FSX only)"},
+
+      // Zulu day of week (FSX only) — 0=Sunday (assumed, matches SYSTEMTIME/tm_wday)
+      {0x0243, 1,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &)
+       {
+         static XPLMDataRef r_zy = XPLMFindDataRef("sim/time/zulu_date_days");
+         static XPLMDataRef r_ly = XPLMFindDataRef("sim/time/local_date_days");
+         XPLMDataRef r = r_zy ? r_zy : r_ly;
+         std::time_t now = std::time(nullptr);
+         std::tm tm = {};
+         gmtime_s(&tm, &now);
+         tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
+         tm.tm_mon = 0;
+         tm.tm_mday = 1 + (r ? XPLMGetDatai(r) : 0);
+         std::time_t t = _mkgmtime(&tm);
+         std::tm out = {};
+         gmtime_s(&out, &t);
+         put<uint8_t>(dst, static_cast<uint8_t>(out.tm_wday));
+       },
+       nullptr,
+       "Zulu day of week (FSX only)"},
 
       // Local month of year (FSX only)
       {0x0244, 1,
