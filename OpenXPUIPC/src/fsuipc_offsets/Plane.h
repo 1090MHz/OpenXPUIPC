@@ -101,18 +101,18 @@ inline const std::vector<OffsetEntry> &fsuipc_offset_table_plane()
        },
        nullptr,
        "Gear type (<= FS2000)"},
-//
-//       // Retractable gear
-//       {0x060E, 1,
-//        // Read/Write: Read (only)
-//        [](uint8_t *dst, DataRefCache &dref)
-//        {
-//          (void)dref;
-//          static XPLMDataRef r = XPLMFindDataRef("TODO: sim/fsuipc_0x060E");
-//          put<uint8_t>(dst, static_cast<uint8_t>(r ? XPLMGetDatai(r) : 0));
-//        },
-//        nullptr,
-//        "Retractable gear"},
+
+      // Retractable gear flag — 0=fixed, 1=retractable
+      {0x060E, 2,
+       // Read/Write: Read (only)
+       [](uint8_t *dst, DataRefCache &dref)
+       {
+         (void)dref;
+         static XPLMDataRef r = XPLMFindDataRef("sim/aircraft/gear/acf_gear_retract");
+         put<uint16_t>(dst, static_cast<uint16_t>(r && XPLMGetDatai(r) ? 1 : 0));
+       },
+       nullptr,
+       "Retractable gear"},
 //
 //       // Retractable left float extension — 0=fully retracted, 16384=fully
 //       // extended
